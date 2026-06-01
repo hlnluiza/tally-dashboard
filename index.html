@@ -393,13 +393,7 @@ Respostas:
     return;
   }
   const schema='{"tldr":"2 frases","findings":[{"title":"t","text":"f","quote":"q","color":"blue"}],"recommendations":[{"priority":"P1","text":"a"}],"gaps":["g1"],"next_steps":["p1"],"clusters":[{"name":"tema","count":3,"sentiment":"positive","quotes":["q1"]}],"matrix":{"critical":["c"],"watch":["w"],"monitor":["m"],"ok":["o"]}}';
-  const prompt='Você é um UX Researcher sênior. Analise os dados e retorne APENAS JSON válido com esta estrutura: '+schema+'
-
-Respostas abertas:
-'+(openTexts||'(nenhuma)')+'
-
-Dados quantitativos:
-'+(choiceTexts||'(nenhum)');
+  const prompt='Você é um UX Researcher sênior. Analise os dados e retorne APENAS JSON válido com esta estrutura: '+schema+'\n\nRespostas abertas:\n'+(openTexts||'(nenhuma)')+'\n\nDados quantitativos:\n'+(choiceTexts||'(nenhum)');
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
@@ -412,7 +406,7 @@ Dados quantitativos:
     });
     const data=await res.json();
     const raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
-    const ins=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const ins=JSON.parse(raw.trim());
     renderInsights(ins);
     renderClusters(ins.clusters||[]);
     renderMatrix(ins.matrix||{});

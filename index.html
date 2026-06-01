@@ -18,7 +18,6 @@
   --amber:#854F0B;--amber-bg:#FAEEDA;
   --blue:#185FA5;--blue-bg:#E6F1FB;
   --red:#A32D2D;--red-bg:#FCEBEB;
-  --teal-bg:#E1F5EE;--teal:#085041;
   --sans:'Syne',sans-serif;--mono:'DM Mono',monospace;
   --r:10px;--rl:14px;
 }
@@ -27,7 +26,7 @@
     --bg:#161614;--surface:#1f1f1c;--surface2:#2a2a26;
     --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
     --text:#f0efe8;--text2:#9a9990;--text3:#5a5a55;
-    --green-bg:#17340440;--amber-bg:#41240240;--blue-bg:#042C5340;--red-bg:#50131340;--teal-bg:#04342C40;
+    --green-bg:#17340440;--amber-bg:#41240240;--blue-bg:#042C5340;--red-bg:#50131340;
   }
 }
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh}
@@ -40,16 +39,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15
 .btn:hover{background:var(--surface2)}
 .btn-solid{background:var(--text);color:var(--bg);border-color:transparent}
 .btn-solid:hover{opacity:.82}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.status-bar{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;font-size:12px;color:var(--text2)}
+.config{background:var(--surface2);border-radius:var(--rl);padding:1.1rem 1.25rem;margin-bottom:1.25rem}
+.config-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.cf{flex:1;min-width:150px}
+.cf label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px}
+.cf input{width:100%;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none}
+.status-bar{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--text2)}
 .pulse{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0}
 .pulse.live{background:#639922;animation:blink 2s infinite}
-.pulse.error{background:#E24B4A}
+.pulse.demo{background:#378ADD}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .new-badge{font-size:11px;background:var(--green-bg);color:var(--green);border-radius:20px;padding:2px 9px;display:none;animation:pop .3s ease}
 @keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
-.alert-bar{font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:1rem;display:none;align-items:center;gap:8px}
-.alert-warn{background:var(--amber-bg);color:#633806;border:.5px solid #EF9F2780}
+.alert-bar{font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:1rem;display:none;align-items:center;gap:8px;background:var(--amber-bg);color:#633806;border:.5px solid #EF9F2780}
 .section{margin-bottom:1.5rem}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
 .st{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:7px}
@@ -61,7 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15
 .deadline-bar{background:var(--surface2);border-radius:var(--r);padding:.9rem 1rem;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:10px}
 .dl-label{font-size:12px;color:var(--text2);white-space:nowrap}
 .dl-track{flex:1;min-width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.dl-fill{height:100%;background:#378ADD;border-radius:3px;transition:width .6s}
+.dl-fill{height:100%;background:#378ADD;border-radius:3px}
 .dl-days{font-size:13px;font-weight:500;color:var(--text);font-family:var(--mono);white-space:nowrap}
 .tabs{display:flex;gap:4px;margin-bottom:1rem;flex-wrap:wrap}
 .tab{font-size:13px;padding:6px 14px;border-radius:20px;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--text2);transition:all .15s;font-family:var(--sans)}
@@ -110,7 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15
 .mtag.watch{background:var(--amber-bg);color:#633806;border-color:#FAC77580}
 .mtag.monitor{background:var(--blue-bg);color:#0C447C;border-color:#85B7EB80}
 .mtag.ok{background:var(--green-bg);color:#27500A;border-color:#C0DD9780}
-.matrix-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;padding:0 2px}
+.matrix-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px}
 .clusters-list{display:flex;flex-direction:column;gap:10px}
 .cluster-card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem}
 .cluster-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
@@ -147,7 +149,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15
 .share-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:.75rem}
 .share-url{flex:1;min-width:160px;font-size:12px;font-family:var(--mono);background:var(--surface2);border:.5px solid var(--border);border-radius:var(--r);padding:7px 10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .copied{font-size:12px;color:var(--green);display:none;align-items:center;gap:4px}
-.loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);padding:2rem 0;justify-content:center}
+.loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);padding:1.5rem 0}
 .spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:4rem 1rem;color:var(--text3)}
@@ -157,44 +159,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15
 </head>
 <body>
 <div class="page">
-
 <div class="topbar">
   <div class="logo"><span class="logo-dot"></span>Research Dashboard</div>
   <div class="actions">
     <button class="btn" id="btnPresent" onclick="togglePresentation()"><i class="ti ti-presentation" aria-hidden="true"></i> Apresentar</button>
     <button class="btn" id="btnCopyMd" style="display:none" onclick="copyMarkdown()"><i class="ti ti-markdown" aria-hidden="true"></i> Exportar</button>
-    <button class="btn" onclick="fetchData()"><i class="ti ti-refresh" aria-hidden="true"></i> Atualizar</button>
   </div>
 </div>
-
-<div class="status-bar">
-  <span class="pulse" id="pulseEl"></span>
-  <span id="statusText">Carregando dados…</span>
-  <span class="new-badge" id="newBadge"></span>
+<div id="configBlock">
+  <div class="config">
+    <div class="config-row">
+      <div class="cf"><label for="formId">Form ID do Tally</label><input type="text" id="formId" value="dWvNQo"/></div>
+      <div class="cf"><label for="apiKey">API Key</label><input type="password" id="apiKey" value="tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7"/></div>
+      <button class="btn btn-solid" onclick="connectForm()"><i class="ti ti-plug" aria-hidden="true"></i> Conectar</button>
+    </div>
+    <div class="status-bar">
+      <span class="pulse" id="pulseEl"></span>
+      <span id="statusText">Clique em Conectar para carregar os dados</span>
+      <span class="new-badge" id="newBadge"></span>
+    </div>
+  </div>
 </div>
-
 <div id="alertBlock" class="alert-bar" role="alert"></div>
-
 <div id="mainContent">
-  <div class="loading"><span class="spinner"></span> Conectando ao Tally…</div>
+  <div class="empty">
+    <i class="ti ti-chart-dots-3" aria-hidden="true"></i>
+    <p>Clique em <strong>Conectar</strong> para carregar os dados do formulário.</p>
+  </div>
 </div>
-
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const FORM_ID = 'dWvNQo';
-const API_KEY = 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
-
 let pollInterval=null,lastCount=0,researchData=null,presentationMode=false,timelineChart=null;
 const BC=['#378ADD','#1D9E75','#D85A30','#BA7517','#D4537E','#7F77DD','#639922','#E24B4A'];
-
 function setStatus(t,txt){
-  document.getElementById('pulseEl').className='pulse '+(t==='live'?'live':t==='error'?'error':'');
+  document.getElementById('pulseEl').className='pulse '+(t==='live'?'live':t==='demo'?'demo':'');
   document.getElementById('statusText').textContent=txt;
 }
 function showAlert(msg){
   const el=document.getElementById('alertBlock');
-  el.className='alert-bar alert-warn';
   el.innerHTML='<i class="ti ti-alert-triangle" aria-hidden="true"></i>'+msg;
   el.style.display='flex';
 }
@@ -205,13 +208,19 @@ function showNewBadge(n){
   b.style.display='inline-block';
   setTimeout(()=>{b.style.display='none';},5000);
 }
-
-async function fetchData(){
+function connectForm(){
+  const fid=document.getElementById('formId').value.trim();
+  const key=document.getElementById('apiKey').value.trim();
+  if(!fid||!key){alert('Preencha o Form ID e a API Key.');return;}
+  setStatus('loading','Conectando…');
+  fetchTallyData(fid,key);
+}
+async function fetchTallyData(fid,key){
   try{
-    const res=await fetch('https://api.tally.so/forms/'+FORM_ID+'/submissions?limit=500',{
-      headers:{Authorization:'Bearer '+API_KEY}
+    const res=await fetch('https://api.tally.so/forms/'+fid+'/submissions?limit=500',{
+      headers:{Authorization:'Bearer '+key}
     });
-    if(!res.ok)throw new Error('Erro '+res.status);
+    if(!res.ok)throw new Error('Erro '+res.status+' — verifique Form ID e API Key');
     const json=await res.json();
     const parsed=parseTally(json);
     researchData=parsed;
@@ -222,14 +231,14 @@ async function fetchData(){
     renderDashboard(parsed);
     setStatus('live','Ao vivo · atualizado '+new Date().toLocaleTimeString('pt-BR'));
     if(!pollInterval){
-      pollInterval=setInterval(fetchData,30000);
+      const cf=fid,ck=key;
+      pollInterval=setInterval(()=>fetchTallyData(cf,ck),30000);
     }
   }catch(e){
-    setStatus('error','Erro ao carregar: '+e.message);
-    document.getElementById('mainContent').innerHTML='<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>Não foi possível conectar ao Tally.<br>'+e.message+'</p></div>';
+    setStatus('','Erro: '+e.message);
+    document.getElementById('mainContent').innerHTML='<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>'+e.message+'</p></div>';
   }
 }
-
 function parseTally(json){
   const subs=json.submissions||[];
   const fields={};
@@ -251,29 +260,24 @@ function parseTally(json){
   dates.forEach(d=>{const k=d.toISOString().slice(0,10);byDay[k]=(byDay[k]||0)+1;});
   return{total:subs.length,completionRate:subs.length?Math.round(completed/subs.length*100):0,avgTime,veryFast,firstDate:dates[0],lastDate:dates[dates.length-1],fields,byDay};
 }
-
 function checkQuality(d){
   hideAlert();
   if(d.completionRate<70)showAlert('Taxa de conclusão baixa ('+d.completionRate+'%) — considere revisar o formulário.');
-  else if(d.veryFast>2)showAlert(d.veryFast+' respostas completadas em menos de 1 minuto — possíveis dados de baixa qualidade.');
+  else if(d.veryFast>2)showAlert(d.veryFast+' respostas em menos de 1 minuto — possíveis dados de baixa qualidade.');
 }
-
 function detectType(t){
-  const s=(t||'').toUpperCase();
+  const s=(t||''). toUpperCase();
   if(s.includes('MULTIPLE')||s.includes('CHECKBOX')||s.includes('DROPDOWN')||s.includes('RADIO')||s.includes('SELECT'))return'choice';
   if(s.includes('LINEAR')||s.includes('RATING')||s.includes('SCALE')||s.includes('NPS'))return'nps';
   return'open';
 }
 function fmt(d){return d?d.toLocaleDateString('pt-BR'):'—';}
 function daysUntil(ds){return Math.max(0,Math.ceil((new Date(ds)-new Date())/86400000));}
-
 function renderDashboard(data){
   const mc=document.getElementById('mainContent');
-  const deadline='2025-06-10';
-  const daysLeft=daysUntil(deadline);
+  const daysLeft=daysUntil('2025-06-10');
   const elapsed=Math.min(100,Math.round((1-daysLeft/40)*100));
   let h='';
-
   h+='<div class="section"><div class="metrics-grid">';
   h+='<div class="mc"><div class="mc-label">Respostas</div><div class="mc-val">'+data.total+'</div><div class="mc-sub">coletadas até agora</div></div>';
   h+='<div class="mc"><div class="mc-label">Conclusão</div><div class="mc-val">'+data.completionRate+'%</div><div class="mc-sub">'+(data.completionRate>=70?'qualidade ok':'abaixo de 70%')+'</div></div>';
@@ -281,7 +285,6 @@ function renderDashboard(data){
   h+='<div class="mc"><div class="mc-label">Período</div><div class="mc-val" style="font-size:13px;padding-top:7px">'+fmt(data.firstDate)+'</div><div class="mc-sub">→ '+fmt(data.lastDate)+'</div></div>';
   h+='</div>';
   h+='<div class="deadline-bar"><span class="dl-label"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>Encerra 10/06</span><div class="dl-track"><div class="dl-fill" style="width:'+elapsed+'%"></div></div><span class="dl-days">'+daysLeft+' dias restantes</span></div></div>';
-
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-layout-grid" aria-hidden="true"></i>Mapa de severidade</div></div>';
   h+='<div class="matrix-wrap"><p class="matrix-hint">Impacto × Frequência — clique em "Gerar síntese" para popular automaticamente.</p>';
   h+='<div class="matrix-grid">';
@@ -290,44 +293,27 @@ function renderDashboard(data){
   h+='<div class="mcell ok"><div class="mcell-label">Baixo impacto · baixa freq.</div><div id="m-ok"></div></div>';
   h+='<div class="mcell monitor"><div class="mcell-label">Monitorar — alta frequência</div><div id="m-monitor"></div></div>';
   h+='</div><div class="matrix-axis"><span>← Impacto menor</span><span>Impacto maior →</span></div></div></div>';
-
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-list-details" aria-hidden="true"></i>Perguntas</div></div>';
-  h+='<div class="tabs">';
-  h+='<button class="tab active" onclick="switchTab(\'all\',this)">Todas</button>';
-  h+='<button class="tab" onclick="switchTab(\'choice\',this)">Escolha múltipla</button>';
-  h+='<button class="tab" onclick="switchTab(\'nps\',this)">Escalas</button>';
-  h+='<button class="tab" onclick="switchTab(\'open\',this)">Abertas</button>';
-  h+='</div>';
-  h+='<div id="qAll" class="tab-panel active">';
-  Object.entries(data.fields).forEach(([k,f],i)=>{h+=renderField(f,i);});
-  h+='</div><div id="qChoice" class="tab-panel">';
-  Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='choice').forEach(([k,f],i)=>{h+=renderField(f,i);});
-  h+='</div><div id="qNps" class="tab-panel">';
-  Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='nps').forEach(([k,f],i)=>{h+=renderField(f,i);});
-  h+='</div><div id="qOpen" class="tab-panel">';
-  Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='open').forEach(([k,f],i)=>{h+=renderField(f,i);});
-  h+='</div></div>';
-
+  h+='<div class="tabs"><button class="tab active" onclick="switchTab(\'all\',this)">Todas</button><button class="tab" onclick="switchTab(\'choice\',this)">Escolha múltipla</button><button class="tab" onclick="switchTab(\'nps\',this)">Escalas</button><button class="tab" onclick="switchTab(\'open\',this)">Abertas</button></div>';
+  h+='<div id="qAll" class="tab-panel active">';Object.entries(data.fields).forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
+  h+='<div id="qChoice" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='choice').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
+  h+='<div id="qNps" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='nps').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
+  h+='<div id="qOpen" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='open').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-tag" aria-hidden="true"></i>Clusters temáticos</div></div>';
   h+='<div class="clusters-list" id="clustersList"><p style="font-size:13px;color:var(--text2)">Clique em "Gerar síntese" para agrupar as respostas por tema.</p></div></div>';
-
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-chart-area" aria-hidden="true"></i>Volume por dia</div></div>';
   h+='<div class="timeline-wrap"><div style="position:relative;height:140px"><canvas id="tlChart" role="img" aria-label="Volume de respostas por dia"></canvas></div></div></div>';
-
   h+='<div class="section"><div class="insights-panel"><div class="insights-top"><div class="st" style="margin:0"><i class="ti ti-sparkles" aria-hidden="true"></i>Síntese executiva com IA</div>';
   h+='<button class="btn btn-solid" onclick="generateInsights()"><i class="ti ti-wand" aria-hidden="true"></i> Gerar síntese</button></div>';
   h+='<div id="insightsContent"><p style="font-size:13px;color:var(--text2)">Clique em "Gerar síntese" para obter TL;DR, achados, recomendações, lacunas e próximos passos.</p></div></div></div>';
-
   h+='<div class="share-card"><div class="st"><i class="ti ti-share" aria-hidden="true"></i>Compartilhar</div>';
   h+='<div class="share-row"><div class="share-url" id="shareUrlEl">'+window.location.href+'</div>';
   h+='<button class="btn" onclick="copyShare()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar link</button>';
   h+='<button class="btn" id="btnCopyMd2" style="display:none" onclick="copyMarkdown()"><i class="ti ti-markdown" aria-hidden="true"></i> Copiar síntese</button>';
   h+='<span class="copied" id="copiedMsg"><i class="ti ti-check" aria-hidden="true"></i> Copiado!</span></div></div>';
-
   mc.innerHTML=h;
   renderTimeline(data.byDay);
 }
-
 function renderField(f,i){
   const t=detectType(f.type);
   if(t==='choice')return renderChoice(f,i);
@@ -364,31 +350,20 @@ function renderOpen(f,i){
   const list=items.map((v,j)=>'<div class="open-item"><span class="open-num">'+(j+1)+'</span><span>'+String(v).slice(0,200)+'</span></div>').join('');
   return'<div class="q-card"><div class="q-top"><div class="q-title">'+(f.label||'Pergunta '+(i+1))+'</div><span class="q-badge">texto aberto · '+items.length+' respostas</span></div><div class="open-list">'+(list||'<p style="font-size:13px;color:var(--text2)">Sem respostas ainda.</p>')+'</div><textarea class="note-field" rows="1" placeholder="Adicionar anotação…"></textarea></div>';
 }
-
 function renderTimeline(byDay){
   const keys=Object.keys(byDay).sort();
   if(!keys.length)return;
   const ctx=document.getElementById('tlChart');
   if(!ctx)return;
   if(timelineChart)timelineChart.destroy();
-  timelineChart=new Chart(ctx,{
-    type:'line',
-    data:{
-      labels:keys.map(k=>{const d=new Date(k+'T12:00:00');return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}),
-      datasets:[{label:'Respostas',data:keys.map(k=>byDay[k]),fill:true,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.1)',tension:.4,pointRadius:3,pointBackgroundColor:'#378ADD',borderWidth:2}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:11},stepSize:1},beginAtZero:true}}}
-  });
+  timelineChart=new Chart(ctx,{type:'line',data:{labels:keys.map(k=>{const d=new Date(k+'T12:00:00');return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});}),datasets:[{label:'Respostas',data:keys.map(k=>byDay[k]),fill:true,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.1)',tension:.4,pointRadius:3,pointBackgroundColor:'#378ADD',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:{color:'rgba(128,128,128,0.1)'},ticks:{font:{size:11},stepSize:1},beginAtZero:true}}}});
 }
-
 function switchTab(id,btn){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  const map={all:'qAll',choice:'qChoice',nps:'qNps',open:'qOpen'};
-  document.getElementById(map[id])?.classList.add('active');
+  document.getElementById({all:'qAll',choice:'qChoice',nps:'qNps',open:'qOpen'}[id])?.classList.add('active');
   btn.classList.add('active');
 }
-
 async function generateInsights(){
   if(!researchData)return;
   const ic=document.getElementById('insightsContent');
@@ -397,91 +372,48 @@ async function generateInsights(){
   const choiceTexts=Object.values(researchData.fields).filter(f=>detectType(f.type)==='choice').map(f=>{const c={};f.values.forEach(v=>{(Array.isArray(v)?v:[v]).forEach(x=>{if(x)c[x]=(c[x]||0)+1;});});return'Pergunta: "'+f.label+'"\n'+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');}).join('\n');
   if(!openTexts.trim()&&!choiceTexts.trim()){ic.innerHTML='<p style="font-size:13px;color:var(--text2)">Sem dados suficientes.</p>';return;}
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        messages:[{role:'user',content:'Você é um UX Researcher sênior. Analise os dados e retorne APENAS JSON válido (sem markdown, sem texto extra) com esta estrutura:\n{"tldr":"2 frases resumindo o principal achado","findings":[{"title":"título","text":"1 frase","quote":"citação direta","color":"blue"},{"title":"...","text":"...","quote":"...","color":"teal"},{"title":"...","text":"...","quote":"...","color":"amber"}],"recommendations":[{"priority":"P1","text":"ação concreta"},{"priority":"P2","text":"..."},{"priority":"P3","text":"..."}],"gaps":["lacuna 1","lacuna 2","lacuna 3"],"next_steps":["próximo passo 1","próximo passo 2"],"clusters":[{"name":"tema","count":5,"sentiment":"positive","quotes":["citação 1","citação 2"]},{"name":"tema2","count":3,"sentiment":"negative","quotes":["citação"]},{"name":"tema3","count":4,"sentiment":"neutral","quotes":["citação"]}],"matrix":{"critical":["problema crítico"],"watch":["problema de atenção"],"monitor":["comportamento frequente"],"ok":["ponto positivo"]}}\n\nRespostas abertas:\n'+(openTexts||'(nenhuma)')+'\n\nDados quantitativos:\n'+(choiceTexts||'(nenhum)')}]
-      })
-    });
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:'Voc\u00ea \u00e9 um UX Researcher s\u00eanior. Analise os dados e retorne APENAS JSON v\u00e1lido (sem markdown, sem texto extra) com esta estrutura:\n{"tldr":"2 frases","findings":[{"title":"t\u00edtulo","text":"1 frase","quote":"cita\u00e7\u00e3o","color":"blue"},{"title":"...","text":"...","quote":"...","color":"teal"},{"title":"...","text":"...","quote":"...","color":"amber"}],"recommendations":[{"priority":"P1","text":"a\u00e7\u00e3o"},{"priority":"P2","text":"..."},{"priority":"P3","text":"..."}],"gaps":["lacuna 1","lacuna 2"],"next_steps":["passo 1","passo 2"],"clusters":[{"name":"tema","count":5,"sentiment":"positive","quotes":["cita\u00e7\u00e3o 1","cita\u00e7\u00e3o 2"]},{"name":"tema2","count":3,"sentiment":"negative","quotes":["cita\u00e7\u00e3o"]}],"matrix":{"critical":["problema cr\u00edtico"],"watch":["aten\u00e7\u00e3o"],"monitor":["monitorar"],"ok":["positivo"]}}\n\nRespostas abertas:\n'+(openTexts||'(nenhuma)')+'\n\nDados quantitativos:\n'+(choiceTexts||'(nenhum)')}]}});
     const data=await res.json();
-    const raw=(data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim();
-    const ins=JSON.parse(raw);
-    renderInsights(ins);
-    renderClusters(ins.clusters||[]);
-    renderMatrix(ins.matrix||{});
+    const ins=JSON.parse((data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim());
+    renderInsights(ins);renderClusters(ins.clusters||[]);renderMatrix(ins.matrix||{});
     window._lastInsights=ins;
-  }catch(e){
-    ic.innerHTML='<p style="font-size:13px;color:var(--red)">Erro: '+e.message+'</p>';
-  }
+  }catch(e){ic.innerHTML='<p style="font-size:13px;color:var(--red)">Erro: '+e.message+'</p>';}
 }
-
 function renderInsights(ins){
   const cm={blue:{bg:'#E6F1FB',fg:'#0C447C',bd:'#185FA580'},teal:{bg:'#E1F5EE',fg:'#085041',bd:'#1D9E7580'},amber:{bg:'#FAEEDA',fg:'#633806',bd:'#BA751780'}};
   let h='';
   if(ins.tldr)h+='<div class="tldr">'+ins.tldr+'</div>';
-  if(ins.findings?.length){
-    h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';
-    ins.findings.forEach((f,i)=>{const c=cm[f.color]||cm.blue;h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'"><div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div><div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>'+(f.quote?'<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"'+f.quote+'"</div>':'')+'</div>';});
-    h+='</div>';
-  }
-  if(ins.recommendations?.length){
-    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações de produto</div><div class="recs-list">';
-    ins.recommendations.forEach(r=>{h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';});
-    h+='</div>';
-  }
-  if(ins.gaps?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas da pesquisa</div><ul class="gaps-list">';ins.gaps.forEach(g=>{h+='<li>'+g+'</li>';});h+='</ul>';}
+  if(ins.findings?.length){h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';ins.findings.forEach((f,i)=>{const c=cm[f.color]||cm.blue;h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'"><div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div><div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>'+(f.quote?'<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"+f.quote+"</div>':'')+'</div>';});h+='</div>';}
+  if(ins.recommendations?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações</div><div class="recs-list">';ins.recommendations.forEach(r=>{h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';});h+='</div>';}
+  if(ins.gaps?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas</div><ul class="gaps-list">';ins.gaps.forEach(g=>{h+='<li>'+g+'</li>';});h+='</ul>';}
   if(ins.next_steps?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos passos</div><ul class="gaps-list">';ins.next_steps.forEach(n=>{h+='<li>'+n+'</li>';});h+='</ul>';}
   document.getElementById('insightsContent').innerHTML=h;
-  const b=document.getElementById('btnCopyMd');if(b)b.style.display='inline-flex';
-  const b2=document.getElementById('btnCopyMd2');if(b2)b2.style.display='inline-flex';
+  ['btnCopyMd','btnCopyMd2'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display='inline-flex';});
 }
-
 function renderClusters(clusters){
-  const cl=document.getElementById('clustersList');
-  if(!cl||!clusters.length)return;
-  cl.innerHTML=clusters.map(c=>{
-    const sc=c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu';
-    const sl=c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro';
-    return'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+sc+'">'+sl+'</span></div></div><div class="cluster-quotes">'+(c.quotes||[]).slice(0,2).map(q=>'<div class="cq"><span class="cq-mark">"</span><span>'+q+'"</span></div>').join('')+'</div></div>';
-  }).join('');
+  const cl=document.getElementById('clustersList');if(!cl||!clusters.length)return;
+  cl.innerHTML=clusters.map(c=>'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+(c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu')+'">'+(c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro')+'</span></div></div><div class="cluster-quotes">'+(c.quotes||[]).slice(0,2).map(q=>'<div class="cq"><span class="cq-mark">“</span><span>'+q+'"</span></div>').join('')+'</div></div>').join('');
 }
-
 function renderMatrix(m){
-  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(([id,cls,items])=>{
-    const el=document.getElementById(id);
-    if(el)el.innerHTML=items.map(t=>'<span class="mtag '+cls+'">'+t+'</span>').join('');
-  });
+  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(([id,cls,items])=>{const el=document.getElementById(id);if(el)el.innerHTML=items.map(t=>'<span class="mtag '+cls+'">'+t+'</span>').join('');});
 }
-
 function togglePresentation(){
   presentationMode=!presentationMode;
+  document.getElementById('configBlock').style.display=presentationMode?'none':'block';
   document.getElementById('btnPresent').innerHTML=presentationMode?'<i class="ti ti-presentation-off" aria-hidden="true"></i> Sair':'<i class="ti ti-presentation" aria-hidden="true"></i> Apresentar';
 }
-
-function copyShare(){
-  navigator.clipboard.writeText(window.location.href).then(()=>showCopied());
-}
+function copyShare(){navigator.clipboard.writeText(window.location.href).then(()=>showCopied());}
 function copyMarkdown(){
   const ins=window._lastInsights;if(!ins)return;
   let md='# Síntese da Pesquisa\n\n';
   if(ins.tldr)md+='**TL;DR:** '+ins.tldr+'\n\n';
-  if(ins.findings?.length){md+='## Principais achados\n';ins.findings.forEach((f,i)=>{md+=(i+1)+'. **'+f.title+'** — '+f.text+(f.quote?'\n   > "'+f.quote+'"':'')+'\n';});md+='\n';}
+  if(ins.findings?.length){md+='## Principais achados\n';ins.findings.forEach((f,i)=>{md+=(i+1)+'. '+f.title+' — '+f.text+(f.quote?'\n   > "'+f.quote+'"':'')+' \n';});md+='\n';}
   if(ins.recommendations?.length){md+='## Recomendações\n';ins.recommendations.forEach(r=>{md+='- ['+r.priority+'] '+r.text+'\n';});md+='\n';}
   if(ins.gaps?.length){md+='## Lacunas\n';ins.gaps.forEach(g=>{md+='- '+g+'\n';});md+='\n';}
   if(ins.next_steps?.length){md+='## Próximos passos\n';ins.next_steps.forEach(n=>{md+='- '+n+'\n';});}
   navigator.clipboard.writeText(md).then(()=>showCopied());
 }
-function showCopied(){
-  const el=document.getElementById('copiedMsg');
-  if(!el)return;
-  el.style.display='inline-flex';
-  setTimeout(()=>{el.style.display='none';},2000);
-}
-
-fetchData();
+function showCopied(){const el=document.getElementById('copiedMsg');if(!el)return;el.style.display='inline-flex';setTimeout(()=>{el.style.display='none';},2000);}
 </script>
 </body>
 </html>

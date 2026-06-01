@@ -266,7 +266,7 @@ function checkQuality(d){
   else if(d.veryFast>2)showAlert(d.veryFast+' respostas em menos de 1 minuto — possíveis dados de baixa qualidade.');
 }
 function detectType(t){
-  const s=(t||''). toUpperCase();
+  const s=(t||'').toUpperCase();
   if(s.includes('MULTIPLE')||s.includes('CHECKBOX')||s.includes('DROPDOWN')||s.includes('RADIO')||s.includes('SELECT'))return'choice';
   if(s.includes('LINEAR')||s.includes('RATING')||s.includes('SCALE')||s.includes('NPS'))return'nps';
   return'open';
@@ -286,7 +286,7 @@ function renderDashboard(data){
   h+='</div>';
   h+='<div class="deadline-bar"><span class="dl-label"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;margin-right:4px" aria-hidden="true"></i>Encerra 10/06</span><div class="dl-track"><div class="dl-fill" style="width:'+elapsed+'%"></div></div><span class="dl-days">'+daysLeft+' dias restantes</span></div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-layout-grid" aria-hidden="true"></i>Mapa de severidade</div></div>';
-  h+='<div class="matrix-wrap"><p class="matrix-hint">Impacto × Frequência — clique em "Gerar síntese" para popular automaticamente.</p>';
+  h+='<div class="matrix-wrap"><p class="matrix-hint">Impacto × Frequência — clique em Gerar síntese para popular.</p>';
   h+='<div class="matrix-grid">';
   h+='<div class="mcell watch"><div class="mcell-label">Alto impacto · baixa freq.</div><div id="m-watch"></div></div>';
   h+='<div class="mcell critical"><div class="mcell-label">⚠ Crítico — prioridade máxima</div><div id="m-critical"></div></div>';
@@ -294,18 +294,18 @@ function renderDashboard(data){
   h+='<div class="mcell monitor"><div class="mcell-label">Monitorar — alta frequência</div><div id="m-monitor"></div></div>';
   h+='</div><div class="matrix-axis"><span>← Impacto menor</span><span>Impacto maior →</span></div></div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-list-details" aria-hidden="true"></i>Perguntas</div></div>';
-  h+='<div class="tabs"><button class="tab active" onclick="switchTab(\'all\',this)">Todas</button><button class="tab" onclick="switchTab(\'choice\',this)">Escolha múltipla</button><button class="tab" onclick="switchTab(\'nps\',this)">Escalas</button><button class="tab" onclick="switchTab(\'open\',this)">Abertas</button></div>';
+  h+='<div class="tabs"><button class="tab active" onclick="switchTab('all',this)">Todas</button><button class="tab" onclick="switchTab('choice',this)">Escolha múltipla</button><button class="tab" onclick="switchTab('nps',this)">Escalas</button><button class="tab" onclick="switchTab('open',this)">Abertas</button></div>';
   h+='<div id="qAll" class="tab-panel active">';Object.entries(data.fields).forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
   h+='<div id="qChoice" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='choice').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
   h+='<div id="qNps" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='nps').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
   h+='<div id="qOpen" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='open').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-tag" aria-hidden="true"></i>Clusters temáticos</div></div>';
-  h+='<div class="clusters-list" id="clustersList"><p style="font-size:13px;color:var(--text2)">Clique em "Gerar síntese" para agrupar as respostas por tema.</p></div></div>';
+  h+='<div class="clusters-list" id="clustersList"><p style="font-size:13px;color:var(--text2)">Clique em Gerar síntese para agrupar as respostas por tema.</p></div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-chart-area" aria-hidden="true"></i>Volume por dia</div></div>';
   h+='<div class="timeline-wrap"><div style="position:relative;height:140px"><canvas id="tlChart" role="img" aria-label="Volume de respostas por dia"></canvas></div></div></div>';
   h+='<div class="section"><div class="insights-panel"><div class="insights-top"><div class="st" style="margin:0"><i class="ti ti-sparkles" aria-hidden="true"></i>Síntese executiva com IA</div>';
   h+='<button class="btn btn-solid" onclick="generateInsights()"><i class="ti ti-wand" aria-hidden="true"></i> Gerar síntese</button></div>';
-  h+='<div id="insightsContent"><p style="font-size:13px;color:var(--text2)">Clique em "Gerar síntese" para obter TL;DR, achados, recomendações, lacunas e próximos passos.</p></div></div></div>';
+  h+='<div id="insightsContent"><p style="font-size:13px;color:var(--text2)">Clique em Gerar síntese para obter TL;DR, achados, recomendações, lacunas e próximos passos.</p></div></div></div>';
   h+='<div class="share-card"><div class="st"><i class="ti ti-share" aria-hidden="true"></i>Compartilhar</div>';
   h+='<div class="share-row"><div class="share-url" id="shareUrlEl">'+window.location.href+'</div>';
   h+='<button class="btn" onclick="copyShare()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar link</button>';
@@ -329,7 +329,7 @@ function renderChoice(f,i){
   const bars=sorted.map(([opt,cnt],idx)=>{
     const pct=Math.round(cnt/total*100);
     const isDom=opt===dom&&pct>40;
-    return'<div class="bar-row"><div class="bar-meta"><span class="'+(isDom?'bar-dom':'')+'">'+opt+(isDom?' ★':'')+'</span><span style="font-family:var(--mono)">'+pct+'% ('+cnt+')</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+BC[idx%BC.length]+'"></div></div></div>';
+    return'<div class="bar-row"><div class="bar-meta"><span class="'+(isDom?'bar-dom':'')+'">'+ opt+(isDom?' ★':'')+' </span><span style="font-family:var(--mono)">'+pct+'% ('+cnt+')</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+BC[idx%BC.length]+'"></div></div></div>';
   }).join('');
   return'<div class="q-card"><div class="q-top"><div class="q-title">'+(f.label||'Pergunta '+(i+1))+'</div><span class="q-badge">múltipla escolha</span></div>'+bars+'<textarea class="note-field" rows="1" placeholder="Adicionar anotação…"></textarea></div>';
 }
@@ -368,52 +368,172 @@ async function generateInsights(){
   if(!researchData)return;
   const ic=document.getElementById('insightsContent');
   ic.innerHTML='<div class="loading"><span class="spinner"></span> Analisando com IA…</div>';
-  const openTexts=Object.values(researchData.fields).filter(f=>detectType(f.type)==='open').map(f=>'Pergunta: "'+f.label+'"\nRespostas:\n'+f.values.filter(Boolean).slice(0,30).map((v,i)=>(i+1)+'. '+v).join('\n')).join('\n\n---\n\n');
-  const choiceTexts=Object.values(researchData.fields).filter(f=>detectType(f.type)==='choice').map(f=>{const c={};f.values.forEach(v=>{(Array.isArray(v)?v:[v]).forEach(x=>{if(x)c[x]=(c[x]||0)+1;});});return'Pergunta: "'+f.label+'"\n'+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');}).join('\n');
-  if(!openTexts.trim()&&!choiceTexts.trim()){ic.innerHTML='<p style="font-size:13px;color:var(--text2)">Sem dados suficientes.</p>';return;}
+  const openTexts=Object.values(researchData.fields)
+    .filter(f=>detectType(f.type)==='open')
+    .map(f=>'Pergunta: "'+f.label+'"
+Respostas:
+'+f.values.filter(Boolean).slice(0,30).map((v,i)=>(i+1)+'. '+v).join('
+'))
+    .join('
+
+---
+
+');
+  const choiceTexts=Object.values(researchData.fields)
+    .filter(f=>detectType(f.type)==='choice')
+    .map(f=>{
+      const c={};
+      f.values.forEach(v=>{(Array.isArray(v)?v:[v]).forEach(x=>{if(x)c[x]=(c[x]||0)+1;});});
+      return'Pergunta: "'+f.label+'"
+'+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');
+    }).join('
+');
+  if(!openTexts.trim()&&!choiceTexts.trim()){
+    ic.innerHTML='<p style="font-size:13px;color:var(--text2)">Sem dados suficientes.</p>';
+    return;
+  }
+  const schema='{"tldr":"2 frases","findings":[{"title":"t","text":"f","quote":"q","color":"blue"}],"recommendations":[{"priority":"P1","text":"a"}],"gaps":["g1"],"next_steps":["p1"],"clusters":[{"name":"tema","count":3,"sentiment":"positive","quotes":["q1"]}],"matrix":{"critical":["c"],"watch":["w"],"monitor":["m"],"ok":["o"]}}';
+  const prompt='Você é um UX Researcher sênior. Analise os dados e retorne APENAS JSON válido com esta estrutura: '+schema+'
+
+Respostas abertas:
+'+(openTexts||'(nenhuma)')+'
+
+Dados quantitativos:
+'+(choiceTexts||'(nenhum)');
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:'Voc\u00ea \u00e9 um UX Researcher s\u00eanior. Analise os dados e retorne APENAS JSON v\u00e1lido (sem markdown, sem texto extra) com esta estrutura:\n{"tldr":"2 frases","findings":[{"title":"t\u00edtulo","text":"1 frase","quote":"cita\u00e7\u00e3o","color":"blue"},{"title":"...","text":"...","quote":"...","color":"teal"},{"title":"...","text":"...","quote":"...","color":"amber"}],"recommendations":[{"priority":"P1","text":"a\u00e7\u00e3o"},{"priority":"P2","text":"..."},{"priority":"P3","text":"..."}],"gaps":["lacuna 1","lacuna 2"],"next_steps":["passo 1","passo 2"],"clusters":[{"name":"tema","count":5,"sentiment":"positive","quotes":["cita\u00e7\u00e3o 1","cita\u00e7\u00e3o 2"]},{"name":"tema2","count":3,"sentiment":"negative","quotes":["cita\u00e7\u00e3o"]}],"matrix":{"critical":["problema cr\u00edtico"],"watch":["aten\u00e7\u00e3o"],"monitor":["monitorar"],"ok":["positivo"]}}\n\nRespostas abertas:\n'+(openTexts||'(nenhuma)')+'\n\nDados quantitativos:\n'+(choiceTexts||'(nenhum)')}]}});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
     const data=await res.json();
-    const ins=JSON.parse((data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim());
-    renderInsights(ins);renderClusters(ins.clusters||[]);renderMatrix(ins.matrix||{});
+    const raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
+    const ins=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderInsights(ins);
+    renderClusters(ins.clusters||[]);
+    renderMatrix(ins.matrix||{});
     window._lastInsights=ins;
-  }catch(e){ic.innerHTML='<p style="font-size:13px;color:var(--red)">Erro: '+e.message+'</p>';}
+  }catch(e){
+    ic.innerHTML='<p style="font-size:13px;color:var(--red)">Erro: '+e.message+'</p>';
+  }
 }
 function renderInsights(ins){
-  const cm={blue:{bg:'#E6F1FB',fg:'#0C447C',bd:'#185FA580'},teal:{bg:'#E1F5EE',fg:'#085041',bd:'#1D9E7580'},amber:{bg:'#FAEEDA',fg:'#633806',bd:'#BA751780'}};
+  const cm={
+    blue:{bg:'#E6F1FB',fg:'#0C447C',bd:'#185FA580'},
+    teal:{bg:'#E1F5EE',fg:'#085041',bd:'#1D9E7580'},
+    amber:{bg:'#FAEEDA',fg:'#633806',bd:'#BA751780'}
+  };
   let h='';
   if(ins.tldr)h+='<div class="tldr">'+ins.tldr+'</div>';
-  if(ins.findings?.length){h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';ins.findings.forEach((f,i)=>{const c=cm[f.color]||cm.blue;h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'"><div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div><div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>'+(f.quote?'<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"+f.quote+"</div>':'')+'</div>';});h+='</div>';}
-  if(ins.recommendations?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações</div><div class="recs-list">';ins.recommendations.forEach(r=>{h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';});h+='</div>';}
-  if(ins.gaps?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas</div><ul class="gaps-list">';ins.gaps.forEach(g=>{h+='<li>'+g+'</li>';});h+='</ul>';}
-  if(ins.next_steps?.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos passos</div><ul class="gaps-list">';ins.next_steps.forEach(n=>{h+='<li>'+n+'</li>';});h+='</ul>';}
+  if(ins.findings&&ins.findings.length){
+    h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';
+    ins.findings.forEach(function(f,i){
+      const c=cm[f.color]||cm.blue;
+      h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'">';
+      h+='<div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div>';
+      h+='<div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>';
+      if(f.quote)h+='<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"'+f.quote+'"</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+  if(ins.recommendations&&ins.recommendations.length){
+    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações</div><div class="recs-list">';
+    ins.recommendations.forEach(function(r){
+      h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';
+    });
+    h+='</div>';
+  }
+  if(ins.gaps&&ins.gaps.length){
+    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas</div><ul class="gaps-list">';
+    ins.gaps.forEach(function(g){h+='<li>'+g+'</li>';});
+    h+='</ul>';
+  }
+  if(ins.next_steps&&ins.next_steps.length){
+    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos passos</div><ul class="gaps-list">';
+    ins.next_steps.forEach(function(n){h+='<li>'+n+'</li>';});
+    h+='</ul>';
+  }
   document.getElementById('insightsContent').innerHTML=h;
-  ['btnCopyMd','btnCopyMd2'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display='inline-flex';});
+  ['btnCopyMd','btnCopyMd2'].forEach(function(id){
+    const b=document.getElementById(id);
+    if(b)b.style.display='inline-flex';
+  });
 }
 function renderClusters(clusters){
-  const cl=document.getElementById('clustersList');if(!cl||!clusters.length)return;
-  cl.innerHTML=clusters.map(c=>'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+(c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu')+'">'+(c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro')+'</span></div></div><div class="cluster-quotes">'+(c.quotes||[]).slice(0,2).map(q=>'<div class="cq"><span class="cq-mark">“</span><span>'+q+'"</span></div>').join('')+'</div></div>').join('');
+  const cl=document.getElementById('clustersList');
+  if(!cl||!clusters.length)return;
+  cl.innerHTML=clusters.map(function(c){
+    const sc=c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu';
+    const sl=c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro';
+    const qs=(c.quotes||[]).slice(0,2).map(function(q){return'<div class="cq"><span class="cq-mark">“</span><span>'+q+'</span></div>';}).join('');
+    return'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+sc+'">'+sl+'</span></div></div><div class="cluster-quotes">'+qs+'</div></div>';
+  }).join('');
 }
 function renderMatrix(m){
-  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(([id,cls,items])=>{const el=document.getElementById(id);if(el)el.innerHTML=items.map(t=>'<span class="mtag '+cls+'">'+t+'</span>').join('');});
+  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(function(arr){
+    const el=document.getElementById(arr[0]);
+    if(el)el.innerHTML=arr[2].map(function(t){return'<span class="mtag '+arr[1]+'">'+t+'</span>';}).join('');
+  });
 }
 function togglePresentation(){
   presentationMode=!presentationMode;
   document.getElementById('configBlock').style.display=presentationMode?'none':'block';
   document.getElementById('btnPresent').innerHTML=presentationMode?'<i class="ti ti-presentation-off" aria-hidden="true"></i> Sair':'<i class="ti ti-presentation" aria-hidden="true"></i> Apresentar';
 }
-function copyShare(){navigator.clipboard.writeText(window.location.href).then(()=>showCopied());}
+function copyShare(){navigator.clipboard.writeText(window.location.href).then(function(){showCopied();});}
 function copyMarkdown(){
-  const ins=window._lastInsights;if(!ins)return;
-  let md='# Síntese da Pesquisa\n\n';
-  if(ins.tldr)md+='**TL;DR:** '+ins.tldr+'\n\n';
-  if(ins.findings?.length){md+='## Principais achados\n';ins.findings.forEach((f,i)=>{md+=(i+1)+'. '+f.title+' — '+f.text+(f.quote?'\n   > "'+f.quote+'"':'')+' \n';});md+='\n';}
-  if(ins.recommendations?.length){md+='## Recomendações\n';ins.recommendations.forEach(r=>{md+='- ['+r.priority+'] '+r.text+'\n';});md+='\n';}
-  if(ins.gaps?.length){md+='## Lacunas\n';ins.gaps.forEach(g=>{md+='- '+g+'\n';});md+='\n';}
-  if(ins.next_steps?.length){md+='## Próximos passos\n';ins.next_steps.forEach(n=>{md+='- '+n+'\n';});}
-  navigator.clipboard.writeText(md).then(()=>showCopied());
+  const ins=window._lastInsights;
+  if(!ins)return;
+  let md='# Síntese da Pesquisa
+
+';
+  if(ins.tldr)md+='**TL;DR:** '+ins.tldr+'
+
+';
+  if(ins.findings&&ins.findings.length){
+    md+='## Principais achados
+';
+    ins.findings.forEach(function(f,i){md+=(i+1)+'. '+f.title+' — '+f.text+(f.quote?'
+   > "'+f.quote+'"':'')+'
+';});
+    md+='
+';
+  }
+  if(ins.recommendations&&ins.recommendations.length){
+    md+='## Recomendações
+';
+    ins.recommendations.forEach(function(r){md+='- ['+r.priority+'] '+r.text+'
+';});
+    md+='
+';
+  }
+  if(ins.gaps&&ins.gaps.length){
+    md+='## Lacunas
+';
+    ins.gaps.forEach(function(g){md+='- '+g+'
+';});
+    md+='
+';
+  }
+  if(ins.next_steps&&ins.next_steps.length){
+    md+='## Próximos passos
+';
+    ins.next_steps.forEach(function(n){md+='- '+n+'
+';});
+  }
+  navigator.clipboard.writeText(md).then(function(){showCopied();});
 }
-function showCopied(){const el=document.getElementById('copiedMsg');if(!el)return;el.style.display='inline-flex';setTimeout(()=>{el.style.display='none';},2000);}
+function showCopied(){
+  const el=document.getElementById('copiedMsg');
+  if(!el)return;
+  el.style.display='inline-flex';
+  setTimeout(function(){el.style.display='none';},2000);
+}
 </script>
 </body>
 </html>

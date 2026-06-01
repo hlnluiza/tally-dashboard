@@ -223,41 +223,41 @@ function connectForm(){
   fetchTallyData(fid,key);
 }
 async function fetchTallyData(fid,key){
-  try{
-    let allSubmissions=[];
-    let questions=null;
-    let afterCursor=null;
-    let page=0;
-    const baseUrl='https://api.tally.so/forms/';
-    do{
-      const url=baseUrl+fid+'/submissions?limit=100'+(afterCursor?'&afterCursor='+encodeURIComponent(afterCursor):'');
-      const res=await fetch(url,{headers:{Authorization:'Bearer '+key}});
-      if(!res.ok)throw new Error('Erro '+res.status+' — verifique Form ID e API Key');
-      const json=await res.json();
-      if(!questions)questions=json.questions||[];
-      const subs=json.submissions||[];
-      allSubmissions=allSubmissions.concat(subs);
-      afterCursor=(json.page&&json.page.afterCursor)?json.page.afterCursor:null;
-      page++;
-      if(page>=200)break;
-    }while(afterCursor);
-    const fullJson={questions,submissions:allSubmissions};
-    const parsed=parseTally(fullJson);
-    researchData=parsed;
-    const isNew=parsed.total>lastCount&&lastCount>0;
-    if(isNew)showNewBadge(parsed.total-lastCount);
-    lastCount=parsed.total;
-    checkQuality(parsed);
-    renderDashboard(parsed);
-    setStatus('live','Ao vivo · '+parsed.total+' respostas · '+new Date().toLocaleTimeString('pt-BR'));
-    if(!pollInterval){
-      const cf=fid,ck=key;
-      pollInterval=setInterval(()=>fetchTallyData(cf,ck),30000);
-    }
-  }catch(e){
-    setStatus('off','Erro: '+e.message);
-    document.getElementById('mainContent').innerHTML='<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>'+e.message+'</p></div>';
-  }
+try{
+let allSubmissions=[];
+let questions=null;
+let pageNum=1;
+let hasMore=true;
+const baseUrl='https://api.tally.so/forms/';
+while(hasMore){
+const url=baseUrl+fid+'/submissions?limit=100&page='+pageNum;
+const res=await fetch(url,{headers:{Authorization:'Bearer '+key}});
+if(!res.ok)throw new Error('Erro '+res.status+' — verifique Form ID e API Key');
+const json=await res.json();
+if(!questions)questions=json.questions||[];
+const subs=json.submissions||[];
+allSubmissions=allSubmissions.concat(subs);
+hasMore=json.hasMore===true&&subs.length>0;
+pageNum++;
+if(pageNum>200)break;
+}
+const fullJson={questions,submissions:allSubmissions};
+const parsed=parseTally(fullJson);
+researchData=parsed;
+const isNew=parsed.total>lastCount&&lastCount>0;
+if(isNew)showNewBadge(parsed.total-lastCount);
+lastCount=parsed.total;
+checkQuality(parsed);
+renderDashboard(parsed);
+setStatus('live','Ao vivo · '+parsed.total+' respostas · '+new Date().toLocaleTimeString('pt-BR'));
+if(!pollInterval){
+const cf=fid,ck=key;
+pollInterval=setInterval(()=>fetchTallyData(cf,ck),30000);
+}
+}catch(e){
+setStatus('off','Erro: '+e.message);
+document.getElementById('mainContent').innerHTML='<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>'+e.message+'</p></div>';
+}
 }
 function parseTally(json){
 const subs=json.submissions||[];
@@ -586,9 +586,9 @@ function loadDemo(){
   setStatus('demo','Modo demo · dados simulados');
 }
 
-// Auto-connect com credenciais salvas
-document.getElementById('formId').value = 'dWvNQo';
-document.getElementById('apiKey').value = 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
+// Auto-connect
+document.getElementById('formId').value='dWvNQo';
+document.getElementById('apiKey').value='tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
 connectForm();
 </script>
 </body>

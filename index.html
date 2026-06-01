@@ -326,17 +326,75 @@ return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.l
 async function generateInsights() {
 if (!researchData) return;
 const ic = document.getElementById('insightsContent');
-ic.innerHTML = '<div class="loading"><span class="spinner"></span> Analisando respostas com IA…</div>';
-const openTexts = Object.values(researchData.fields).filter(f => detectType(f.type) === 'open').map(f => 'Pergunta: "' + f.label + '"\nRespostas:\n' + f.values.filter(Boolean).slice(0,30).map((v,i) => (i+1) + '. ' + v).join('\n')).join('\n\n---\n\n');
-if (!openTexts.trim()) { ic.innerHTML = '<p style="font-size:13px;color:var(--text2)">Nenhuma pergunta aberta encontrada para analisar.</p>'; return; }
-try {
-const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Você é especialista em UX Research. Analise as respostas e retorne APENAS JSON válido (sem markdown, sem texto extra) nesta estrutura exata:\n{"themes":[{"title":"título curto","text":"1 frase","quote":"citação direta"},{"title":"...","text":"...","quote":"..."},{"title":"...","text":"...","quote":"..."}],"pain_points":[{"text":"1 frase"},{"text":"..."}],"opportunities":[{"text":"1 frase"},{"text":"..."}]}\n\nRespostas:\n' + openTexts }] }) });
-const data = await res.json();
-const raw = (data.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
-renderInsights(JSON.parse(raw));
-} catch(e) { ic.innerHTML = '<p style="font-size:13px;color:var(--red)">Erro ao gerar insights: ' + e.message + '</p>'; }
+ic.innerHTML = '<div class="loading"><span class="spinner"></span> Analisando respostas…</div>';
+
+const openFields = Object.values(researchData.fields).filter(f => detectType(f.type) === 'open');
+if (!openFields.length) {
+  ic.innerHTML = '<p style="font-size:13px;color:var(--text2)">Nenhuma pergunta aberta encontrada para analisar.</p>';
+  return;
 }
 
+// Collect all open-ended answers
+const allAnswers = [];
+openFields.forEach(f => {
+  f.values.filter(Boolean).forEach(v => allAnswers.push(String(v)));
+});
+
+// Simple NLP: count word/phrase frequency (pt-BR stopwords filtered)
+const stopwords = new Set(['de','a','o','que','e','do','da','em','um','para','com','uma','os','no','se','na','por','mais','as','dos','como','mas','ao','ele','das','tem','à','seu','sua','ou','ser','quando','muito','há','nos','já','está','também','só','pelo','pela','até','isso','ela','entre','era','depois','sem','mesmo','aos','ter','seus','suas','não','pela','num','numa','ele','eles','elas','nós','vós','esse','essa','esses','essas','este','esta','estes','estas','isso','aquilo','qual','quais','que','quem','todo','toda','todos','todas','outro','outra','outros','outras','pode','mais','foi','ver','aqui','assim','sobre']);
+
+const wordFreq = {};
+allAnswers.forEach(ans => {
+  ans.toLowerCase()
+    .replace(/[^a-záéíóúâêîôûãõçs]/gi,'')
+    .split(/s+/)
+    .filter(w => w.length > 3 && !stopwords.has(w))
+    .forEach(w => { wordFreq[w] = (wordFreq[w] || 0) + 1; });
+});
+
+const topWords = Object.entries(wordFreq).sort((a,b) => b[1]-a[1]).slice(0,15).map(([w]) => w);
+
+// Group answers by keyword themes (top 3 most frequent non-overlapping)
+const themes = [];
+const usedAnswers = new Set();
+
+topWords.slice(0,6).forEach(kw => {
+  const matching = allAnswers.filter((a,i) => !usedAnswers.has(i) && a.toLowerCase().includes(kw));
+  if (matching.length >= 2 && themes.length < 3) {
+    matching.slice(0,3).forEach((_,i) => usedAnswers.add(allAnswers.indexOf(matching[i])));
+    themes.push({
+      title: kw.charAt(0).toUpperCase() + kw.slice(1),
+      text: matching.length + ' resposta' + (matching.length > 1 ? 's' : '') + ' mencionam este tema',
+      quote: matching[0].slice(0, 120)
+    });
+  }
+});
+
+// Pain points: answers with negative keywords
+const painKws = ['difícil','problema','ruim','falta','demora','lento','erro','não funciona','dificuldade','melhorar','precisa','faltando','complicado','confuso'];
+const painPoints = [];
+allAnswers.forEach(a => {
+  if (painKws.some(k => a.toLowerCase().includes(k)) && painPoints.length < 4) {
+    painPoints.push({ text: a.slice(0, 120) });
+  }
+});
+
+// Opportunities: answers with positive/suggestion keywords
+const oppKws = ['poderia','gostaria','seria','quero','precisaria','sugestão','integração','automático','notificação','relatório','dashboard','melhor'];
+const opportunities = [];
+allAnswers.forEach(a => {
+  if (oppKws.some(k => a.toLowerCase().includes(k)) && opportunities.length < 4) {
+    opportunities.push({ text: a.slice(0, 120) });
+  }
+});
+
+// Fallback if nothing found
+if (!themes.length) themes.push({ title: 'Respostas variadas', text: allAnswers.length + ' respostas coletadas para análise', quote: allAnswers[0]?.slice(0, 120) || '' });
+if (!painPoints.length) painPoints.push({ text: 'Nenhum ponto de dor identificado automaticamente.' });
+if (!opportunities.length) opportunities.push({ text: 'Nenhuma oportunidade identificada automaticamente.' });
+
+setTimeout(() => renderInsights({ themes, pain_points: painPoints, opportunities }), 600);
+}
 function renderInsights(ins) {
 const themeColors = [{ bg: '#E6F1FB', fg: '#0C447C', border: '#185FA580' },{ bg: '#E1F5EE', fg: '#085041', border: '#1D9E7580' },{ bg: '#FAEEDA', fg: '#633806', border: '#BA751780' }];
 let html = '<div class="insights-grid">';

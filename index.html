@@ -266,7 +266,7 @@ function checkQuality(d){
   else if(d.veryFast>2)showAlert(d.veryFast+' respostas em menos de 1 minuto — possíveis dados de baixa qualidade.');
 }
 function detectType(t){
-  const s=(t||'').toUpperCase();
+  const s=(t||''). toUpperCase();
   if(s.includes('MULTIPLE')||s.includes('CHECKBOX')||s.includes('DROPDOWN')||s.includes('RADIO')||s.includes('SELECT'))return'choice';
   if(s.includes('LINEAR')||s.includes('RATING')||s.includes('SCALE')||s.includes('NPS'))return'nps';
   return'open';
@@ -368,111 +368,43 @@ async function generateInsights(){
   if(!researchData)return;
   const ic=document.getElementById('insightsContent');
   ic.innerHTML='<div class="loading"><span class="spinner"></span> Analisando com IA…</div>';
-  const openTexts=Object.values(researchData.fields)
-    .filter(f=>detectType(f.type)==='open')
-    .map(f=>'Pergunta: "'+f.label+'"
-Respostas:
-'+f.values.filter(Boolean).slice(0,30).map((v,i)=>(i+1)+'. '+v).join('
-'))
-    .join('
-
----
-
-');
-  const choiceTexts=Object.values(researchData.fields)
-    .filter(f=>detectType(f.type)==='choice')
-    .map(f=>{
-      const c={};
-      f.values.forEach(v=>{(Array.isArray(v)?v:[v]).forEach(x=>{if(x)c[x]=(c[x]||0)+1;});});
-      return'Pergunta: "'+f.label+'"
-'+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');
-    }).join('
-');
-  if(!openTexts.trim()&&!choiceTexts.trim()){
-    ic.innerHTML='<p style="font-size:13px;color:var(--text2)">Sem dados suficientes.</p>';
-    return;
-  }
-  const schema='{"tldr":"2 frases","findings":[{"title":"t","text":"f","quote":"q","color":"blue"}],"recommendations":[{"priority":"P1","text":"a"}],"gaps":["g1"],"next_steps":["p1"],"clusters":[{"name":"tema","count":3,"sentiment":"positive","quotes":["q1"]}],"matrix":{"critical":["c"],"watch":["w"],"monitor":["m"],"ok":["o"]}}';
+  const openTexts=Object.values(researchData.fields).filter(f=>detectType(f.type)==='open').map(f=>'Pergunta: "'+f.label+'"\nRespostas:\n'+f.values.filter(Boolean).slice(0,30).map((v,i)=>(i+1)+'. '+v).join('\n')).join('\n\n---\n\n');
+  const choiceTexts=Object.values(researchData.fields).filter(f=>detectType(f.type)==='choice').map(f=>{const c={};f.values.forEach(v=>{(Array.isArray(v)?v:[v]).forEach(x=>{if(x)c[x]=(c[x]||0)+1;});});return'Pergunta: "'+f.label+'"\n'+Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+': '+v).join(', ');}).join('\n');
+  if(!openTexts.trim()&&!choiceTexts.trim()){ic.innerHTML='<p style="font-size:13px;color:var(--text2)">Sem dados suficientes.</p>';return;}
+  const schema='{"tldr":"2 frases","findings":[{"title":"t","text":"f","quote":"q","color":"blue"}],"recommendations":[{"priority":"P1","text":"a"}],"gaps":["g"],"next_steps":["p"],"clusters":[{"name":"tema","count":3,"sentiment":"positive","quotes":["q"]}],"matrix":{"critical":["c"],"watch":["w"],"monitor":["m"],"ok":["o"]}}';
   const prompt='Você é um UX Researcher sênior. Analise os dados e retorne APENAS JSON válido com esta estrutura: '+schema+'\n\nRespostas abertas:\n'+(openTexts||'(nenhuma)')+'\n\nDados quantitativos:\n'+(choiceTexts||'(nenhum)');
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        messages:[{role:'user',content:prompt}]
-      })
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     const raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
     const ins=JSON.parse(raw.trim());
-    renderInsights(ins);
-    renderClusters(ins.clusters||[]);
-    renderMatrix(ins.matrix||{});
+    renderInsights(ins);renderClusters(ins.clusters||[]);renderMatrix(ins.matrix||{});
     window._lastInsights=ins;
   }catch(e){
     ic.innerHTML='<p style="font-size:13px;color:var(--red)">Erro: '+e.message+'</p>';
   }
 }
 function renderInsights(ins){
-  const cm={
-    blue:{bg:'#E6F1FB',fg:'#0C447C',bd:'#185FA580'},
-    teal:{bg:'#E1F5EE',fg:'#085041',bd:'#1D9E7580'},
-    amber:{bg:'#FAEEDA',fg:'#633806',bd:'#BA751780'}
-  };
+  const cm={blue:{bg:'#E6F1FB',fg:'#0C447C',bd:'#185FA580'},teal:{bg:'#E1F5EE',fg:'#085041',bd:'#1D9E7580'},amber:{bg:'#FAEEDA',fg:'#633806',bd:'#BA751780'}};
   let h='';
   if(ins.tldr)h+='<div class="tldr">'+ins.tldr+'</div>';
-  if(ins.findings&&ins.findings.length){
-    h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';
-    ins.findings.forEach(function(f,i){
-      const c=cm[f.color]||cm.blue;
-      h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'">';
-      h+='<div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div>';
-      h+='<div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>';
-      if(f.quote)h+='<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"'+f.quote+'"</div>';
-      h+='</div>';
-    });
-    h+='</div>';
-  }
-  if(ins.recommendations&&ins.recommendations.length){
-    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações</div><div class="recs-list">';
-    ins.recommendations.forEach(function(r){
-      h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';
-    });
-    h+='</div>';
-  }
-  if(ins.gaps&&ins.gaps.length){
-    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas</div><ul class="gaps-list">';
-    ins.gaps.forEach(function(g){h+='<li>'+g+'</li>';});
-    h+='</ul>';
-  }
-  if(ins.next_steps&&ins.next_steps.length){
-    h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos passos</div><ul class="gaps-list">';
-    ins.next_steps.forEach(function(n){h+='<li>'+n+'</li>';});
-    h+='</ul>';
-  }
+  if(ins.findings&&ins.findings.length){h+='<div class="st" style="margin-bottom:8px"><i class="ti ti-bulb" aria-hidden="true"></i> Principais achados</div><div class="findings-grid">';ins.findings.forEach(function(f,i){const c=cm[f.color]||cm.blue;h+='<div class="fc" style="background:'+c.bg+';border:.5px solid '+c.bd+'">';h+='<div class="fc-tag" style="color:'+c.fg+'">Achado '+(i+1)+'</div>';h+='<div class="fc-body" style="color:'+c.fg+'"><strong>'+f.title+'</strong> — '+f.text+'</div>';if(f.quote)h+='<div class="fc-quote" style="color:'+c.fg+';border-color:'+c.fg+'">"+f.quote+"</div>';h+='</div>';});h+='</div>';}
+  if(ins.recommendations&&ins.recommendations.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-list-check" aria-hidden="true"></i> Recomendações</div><div class="recs-list">';ins.recommendations.forEach(function(r){h+='<div class="rec-item"><span class="rec-prio '+(r.priority==='P1'?'p1':r.priority==='P2'?'p2':'p3')+'">'+r.priority+'</span><span class="rec-text">'+r.text+'</span></div>';});h+='</div>';}
+  if(ins.gaps&&ins.gaps.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-question-mark" aria-hidden="true"></i> Lacunas</div><ul class="gaps-list">';ins.gaps.forEach(function(g){h+='<li>'+g+'</li>';});h+='</ul>';}
+  if(ins.next_steps&&ins.next_steps.length){h+='<div class="st" style="margin:1rem 0 8px"><i class="ti ti-arrow-right" aria-hidden="true"></i> Próximos passos</div><ul class="gaps-list">';ins.next_steps.forEach(function(n){h+='<li>'+n+'</li>';});h+='</ul>';}
   document.getElementById('insightsContent').innerHTML=h;
-  ['btnCopyMd','btnCopyMd2'].forEach(function(id){
-    const b=document.getElementById(id);
-    if(b)b.style.display='inline-flex';
-  });
+  ['btnCopyMd','btnCopyMd2'].forEach(function(id){const b=document.getElementById(id);if(b)b.style.display='inline-flex';});
 }
 function renderClusters(clusters){
-  const cl=document.getElementById('clustersList');
-  if(!cl||!clusters.length)return;
-  cl.innerHTML=clusters.map(function(c){
-    const sc=c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu';
-    const sl=c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro';
-    const qs=(c.quotes||[]).slice(0,2).map(function(q){return'<div class="cq"><span class="cq-mark">“</span><span>'+q+'</span></div>';}).join('');
-    return'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+sc+'">'+sl+'</span></div></div><div class="cluster-quotes">'+qs+'</div></div>';
-  }).join('');
+  const cl=document.getElementById('clustersList');if(!cl||!clusters.length)return;
+  cl.innerHTML=clusters.map(function(c){const sc=c.sentiment==='positive'?'sent-pos':c.sentiment==='negative'?'sent-neg':'sent-neu';const sl=c.sentiment==='positive'?'positivo':c.sentiment==='negative'?'negativo':'neutro';const qs=(c.quotes||[]).slice(0,2).map(function(q){return'<div class="cq"><span class="cq-mark">“</span><span>'+q+'</span></div>';}).join('');return'<div class="cluster-card"><div class="cluster-top"><span class="cluster-name">'+c.name+'</span><div class="cluster-meta"><span class="cluster-count">'+c.count+' menções</span><span class="sent-badge '+sc+'">'+sl+'</span></div></div><div class="cluster-quotes">'+qs+'</div></div>';}).join('');
 }
 function renderMatrix(m){
-  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(function(arr){
-    const el=document.getElementById(arr[0]);
-    if(el)el.innerHTML=arr[2].map(function(t){return'<span class="mtag '+arr[1]+'">'+t+'</span>';}).join('');
-  });
+  [['m-critical','critical',m.critical||[]],['m-watch','watch',m.watch||[]],['m-monitor','monitor',m.monitor||[]],['m-ok','ok',m.ok||[]]].forEach(function(arr){const el=document.getElementById(arr[0]);if(el)el.innerHTML=arr[2].map(function(t){return'<span class="mtag '+arr[1]+'">'+t+'</span>';}).join('');});
 }
 function togglePresentation(){
   presentationMode=!presentationMode;
@@ -481,53 +413,16 @@ function togglePresentation(){
 }
 function copyShare(){navigator.clipboard.writeText(window.location.href).then(function(){showCopied();});}
 function copyMarkdown(){
-  const ins=window._lastInsights;
-  if(!ins)return;
-  let md='# Síntese da Pesquisa
-
-';
-  if(ins.tldr)md+='**TL;DR:** '+ins.tldr+'
-
-';
-  if(ins.findings&&ins.findings.length){
-    md+='## Principais achados
-';
-    ins.findings.forEach(function(f,i){md+=(i+1)+'. '+f.title+' — '+f.text+(f.quote?'
-   > "'+f.quote+'"':'')+'
-';});
-    md+='
-';
-  }
-  if(ins.recommendations&&ins.recommendations.length){
-    md+='## Recomendações
-';
-    ins.recommendations.forEach(function(r){md+='- ['+r.priority+'] '+r.text+'
-';});
-    md+='
-';
-  }
-  if(ins.gaps&&ins.gaps.length){
-    md+='## Lacunas
-';
-    ins.gaps.forEach(function(g){md+='- '+g+'
-';});
-    md+='
-';
-  }
-  if(ins.next_steps&&ins.next_steps.length){
-    md+='## Próximos passos
-';
-    ins.next_steps.forEach(function(n){md+='- '+n+'
-';});
-  }
+  const ins=window._lastInsights;if(!ins)return;
+  let md='# Síntese da Pesquisa\n\n';
+  if(ins.tldr)md+='**TL;DR:** '+ins.tldr+'\n\n';
+  if(ins.findings&&ins.findings.length){md+='## Principais achados\n';ins.findings.forEach(function(f,i){md+=(i+1)+'. '+f.title+' — '+f.text+(f.quote?'\n   > "'+f.quote+'"':'')+'\n';});md+='\n';}
+  if(ins.recommendations&&ins.recommendations.length){md+='## Recomendações\n';ins.recommendations.forEach(function(r){md+='- ['+r.priority+'] '+r.text+'\n';});md+='\n';}
+  if(ins.gaps&&ins.gaps.length){md+='## Lacunas\n';ins.gaps.forEach(function(g){md+='- '+g+'\n';});md+='\n';}
+  if(ins.next_steps&&ins.next_steps.length){md+='## Próximos passos\n';ins.next_steps.forEach(function(n){md+='- '+n+'\n';});}
   navigator.clipboard.writeText(md).then(function(){showCopied();});
 }
-function showCopied(){
-  const el=document.getElementById('copiedMsg');
-  if(!el)return;
-  el.style.display='inline-flex';
-  setTimeout(function(){el.style.display='none';},2000);
-}
-</script>
+function showCopied(){const el=document.getElementById('copiedMsg');if(!el)return;el.style.display='inline-flex';setTimeout(function(){el.style.display='none';},2000);}
+<\/script>
 </body>
 </html>

@@ -195,18 +195,31 @@ fetchTallyData(fid, key);
 
 async function fetchTallyData(fid, key) {
 try {
-const res = await fetch('https://api.tally.so/forms/' + fid + '/submissions?limit=5000', {
-headers: { Authorization: 'Bearer ' + key }
-});
+let allSubmissions = [];
+let questions = null;
+let afterCursor = null;
+let page = 0;
+const baseUrl = 'https://api.tally.so/forms/';
+do {
+const url = baseUrl + fid + '/submissions?limit=100' + (afterCursor ? '&afterCursor=' + encodeURIComponent(afterCursor) : '');
+const res = await fetch(url, { headers: { Authorization: 'Bearer ' + key } });
 if (!res.ok) throw new Error('Erro ' + res.status + ' — verifique Form ID e API Key');
 const json = await res.json();
-const parsed = parseTally(json);
+if (!questions) questions = json.questions || [];
+const subs = json.submissions || [];
+allSubmissions = allSubmissions.concat(subs);
+afterCursor = (json.page && json.page.afterCursor) ? json.page.afterCursor : null;
+page++;
+if (page >= 200) break;
+} while (afterCursor);
+const fullJson = { questions, submissions: allSubmissions };
+const parsed = parseTally(fullJson);
 researchData = parsed;
 const isNew = parsed.total > lastCount && lastCount > 0;
 if (isNew) showNewBadge(parsed.total - lastCount);
 lastCount = parsed.total;
 renderDashboard(parsed);
-setStatus('live', 'Ao vivo · atualizado ' + new Date().toLocaleTimeString('pt-BR'));
+setStatus('live', 'Ao vivo · ' + parsed.total + ' respostas · atualizado ' + new Date().toLocaleTimeString('pt-BR'));
 if (!pollInterval) {
 const currentFid = fid, currentKey = key;
 pollInterval = setInterval(() => fetchTallyData(currentFid, currentKey), 30000);
@@ -216,7 +229,6 @@ setStatus('off', 'Erro: ' + e.message);
 document.getElementById('mainContent').innerHTML = '<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>' + e.message + '</p></div>';
 }
 }
-
 function parseTally(json) {
 const subs = json.submissions || [];
 const questions = json.questions || [];
@@ -405,7 +417,7 @@ html += '</div><div class="pain-opps"><div class="pain-opps-col"><h4><i class="t
 html += '</div><div class="pain-opps-col"><h4><i class="ti ti-bulb" style="color:var(--green)" aria-hidden="true"></i> Oportunidades</h4>';
 (ins.opportunities || []).forEach(o => { html += '<div class="poi-item"><i class="ti ti-plus poi-icon" style="color:var(--green)" aria-hidden="true"></i>' + o.text + '</div>'; });
 html += '</div></div>';
-document.getElementById('insightsContent').innerHTML = html;h
+document.getElementById('insightsContent').innerHTML = html;
 }
 
 function copyShare() {

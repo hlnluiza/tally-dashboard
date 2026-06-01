@@ -561,6 +561,13 @@ function loadDemo(){
   renderDashboard(researchData);
   setStatus('demo','Modo demo · dados simulados');
 }
+
+// Auto-connect com credenciais salvas
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('formId').value = 'dWvNQo';
+  document.getElementById('apiKey').value = 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
+  connectForm();
+});
 </script>
 </body>
 </html>

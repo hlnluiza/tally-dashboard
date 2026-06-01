@@ -252,7 +252,7 @@ const avgTime = durations.length ? Math.round(durations.reduce((a,b)=>a+b,0)/dur
 const completed = subs.filter(s => s.isCompleted !== false).length;
 const dates = subs.map(s => new Date(s.submittedAt || s.createdAt)).filter(d => !isNaN(d)).sort((a,b)=>a-b);
 
-return { total: subs.length, completionRate: subs.length ? Math.round(completed/subs.length*100) : 0, avgTime, firstDate: dates[0], lastDate: dates[dates.length-1], fields };
+return { total: subs.length, completed, completionRate: subs.length ? Math.round(completed/subs.length*100) : 0, avgTime, firstDate: dates[0], lastDate: dates[dates.length-1], fields };
 }
 
 function fmt(d) { return d ? d.toLocaleDateString('pt-BR') : '—'; }
@@ -261,8 +261,8 @@ function renderDashboard(data) {
 const mc = document.getElementById('mainContent');
 const fieldKeys = Object.keys(data.fields);
 let html = '<div class="metrics-row">';
-html += '<div class="metric"><div class="metric-label">Respostas</div><div class="metric-val">' + data.total + '</div></div>';
-html += '<div class="metric"><div class="metric-label">Conclusão</div><div class="metric-val">' + data.completionRate + '%</div></div>';
+html += '<div class="metric"><div class="metric-label">Pesquisa via form</div><div class="metric-val">' + data.total + '</div><div class="metric-sub">total de submissões</div></div>';
+html += '<div class="metric"><div class="metric-label">Concluídos</div><div class="metric-val">' + data.completed + '</div><div class="metric-sub">' + data.completionRate + '% de conclusão</div></div>';
 html += '<div class="metric"><div class="metric-label">Tempo médio</div><div class="metric-val">' + (data.avgTime != null ? data.avgTime + 'min' : '—') + '</div></div>';
 html += '<div class="metric"><div class="metric-label">Período</div><div class="metric-val" style="font-size:14px;padding-top:6px;">' + fmt(data.firstDate) + '<span style="color:var(--text3)"> → </span>' + fmt(data.lastDate) + '</div></div>';
 html += '</div>';
@@ -308,13 +308,14 @@ return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.l
 function renderNPS(field, idx) {
 const nums = field.values.map(v => parseFloat(v)).filter(v => !isNaN(v));
 const total = Math.max(nums.length, 1);
-const promoters = nums.filter(v => v >= 9).length;
-const passives = nums.filter(v => v >= 7 && v < 9).length;
-const detractors = nums.filter(v => v < 7).length;
+// Escala de 1 a 5 estrelas: promotores = 5, passivos = 4, detratores = 1-3
+const promoters = nums.filter(v => v >= 5).length;
+const passives = nums.filter(v => v === 4).length;
+const detractors = nums.filter(v => v <= 3).length;
 const score = Math.round((promoters - detractors) / total * 100);
 const avg = nums.length ? (nums.reduce((a,b) => a+b, 0) / nums.length).toFixed(1) : '—';
 const scoreColor = score >= 50 ? '#3B6D11' : score >= 0 ? '#BA7517' : '#A32D2D';
-return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">escala</span></div><div class="nps-wrap"><div><div class="nps-big" style="color:' + scoreColor + '">' + score + '</div><div class="nps-meta">Score · média ' + avg + '</div></div><div class="nps-segs"><div class="nps-seg"><span class="nps-seg-name" style="color:#3B6D11">Promotores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(promoters/total*100) + '%;background:#639922;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(promoters/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#854F0B">Passivos</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(passives/total*100) + '%;background:#EF9F27;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(passives/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#A32D2D">Detratores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(detractors/total*100) + '%;background:#E24B4A;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(detractors/total*100) + '%</span></div></div></div></div>';
+return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">escala 1-5 ★</span></div><div class="nps-wrap"><div><div class="nps-big" style="color:' + scoreColor + '">' + score + '</div><div class="nps-meta">Score · média ' + avg + ' ★</div></div><div class="nps-segs"><div class="nps-seg"><span class="nps-seg-name" style="color:#3B6D11">Promotores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(promoters/total*100) + '%;background:#639922;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(promoters/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#854F0B">Passivos</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(passives/total*100) + '%;background:#EF9F27;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(passives/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#A32D2D">Detratores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(detractors/total*100) + '%;background:#E24B4A;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(detractors/total*100) + '%</span></div></div></div></div>';
 }
 
 function renderOpen(field, idx) {
@@ -404,7 +405,7 @@ html += '</div><div class="pain-opps"><div class="pain-opps-col"><h4><i class="t
 html += '</div><div class="pain-opps-col"><h4><i class="ti ti-bulb" style="color:var(--green)" aria-hidden="true"></i> Oportunidades</h4>';
 (ins.opportunities || []).forEach(o => { html += '<div class="poi-item"><i class="ti ti-plus poi-icon" style="color:var(--green)" aria-hidden="true"></i>' + o.text + '</div>'; });
 html += '</div></div>';
-document.getElementById('insightsContent').innerHTML = html;
+document.getElementById('insightsContent').innerHTML = html;h
 }
 
 function copyShare() {

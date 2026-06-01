@@ -294,7 +294,7 @@ function renderDashboard(data){
   h+='<div class="mcell monitor"><div class="mcell-label">Monitorar — alta frequência</div><div id="m-monitor"></div></div>';
   h+='</div><div class="matrix-axis"><span>← Impacto menor</span><span>Impacto maior →</span></div></div></div>';
   h+='<div class="section"><div class="sh"><div class="st"><i class="ti ti-list-details" aria-hidden="true"></i>Perguntas</div></div>';
-  h+='<div class="tabs"><button class="tab active" onclick="switchTab('all',this)">Todas</button><button class="tab" onclick="switchTab('choice',this)">Escolha múltipla</button><button class="tab" onclick="switchTab('nps',this)">Escalas</button><button class="tab" onclick="switchTab('open',this)">Abertas</button></div>';
+  h+='<div class="tabs"><button class="tab active" onclick="switchTab(&apos;all&apos;,this)">Todas</button><button class="tab" onclick="switchTab(&apos;choice&apos;,this)">Escolha múltipla</button><button class="tab" onclick="switchTab(&apos;nps&apos;,this)">Escalas</button><button class="tab" onclick="switchTab(&apos;open&apos;,this)">Abertas</button></div>';
   h+='<div id="qAll" class="tab-panel active">';Object.entries(data.fields).forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
   h+='<div id="qChoice" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='choice').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';
   h+='<div id="qNps" class="tab-panel">';Object.entries(data.fields).filter(([k,f])=>detectType(f.type)==='nps').forEach(([k,f],i)=>{h+=renderField(f,i);});h+='</div>';

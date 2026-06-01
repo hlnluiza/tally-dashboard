@@ -260,9 +260,11 @@ async function fetchTallyData(fid,key){
   }
 }
 function parseTally(json){
-  const subs=json.submissions||[];
-  const questions=json.questions||[];
-  const fields={};
+const subs=json.submissions||[];
+const questions=json.questions||[];
+const fields={};
+// Format A: questions array + responses with questionId
+if(questions.length){
   questions.forEach(q=>{
     if(!q.id||q.isDeleted)return;
     fields[q.id]={label:q.title||('Pergunta '+q.id),type:q.type,values:[]};
@@ -275,18 +277,40 @@ function parseTally(json){
       if(Array.isArray(ans)){ans.forEach(a=>{if(a!==null&&a!==undefined&&a!=='')fields[r.questionId].values.push(a);});}
       else{fields[r.questionId].values.push(ans);}
     });
+    // Also handle sub.fields format when mixed
+    (sub.fields||[]).forEach(f=>{
+      if(!f.key)return;
+      if(!fields[f.key])fields[f.key]={label:f.label||f.key,type:f.type||'INPUT_TEXT',values:[]};
+      if(f.value!==null&&f.value!==undefined&&f.value!==''){
+        if(Array.isArray(f.value)){f.value.forEach(a=>{if(a!==null&&a!==undefined&&a!=='')fields[f.key].values.push(a);});}
+        else{fields[f.key].values.push(f.value);}
+      }
+    });
   });
-  const durations=subs.map(s=>{
-    if(s.submittedAt&&s.createdAt)return(new Date(s.submittedAt)-new Date(s.createdAt))/60000;
-    return null;
-  }).filter(v=>v!==null&&v>0&&v<120);
-  const avgTime=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length):null;
-  const veryFast=durations.filter(v=>v<1).length;
-  const completed=subs.filter(s=>s.isCompleted!==false).length;
-  const dates=subs.map(s=>new Date(s.submittedAt||s.createdAt)).filter(d=>!isNaN(d)).sort((a,b)=>a-b);
-  const byDay={};
-  dates.forEach(d=>{const k=d.toISOString().slice(0,10);byDay[k]=(byDay[k]||0)+1;});
-  return{total:subs.length,completionRate:subs.length?Math.round(completed/subs.length*100):0,avgTime,veryFast,firstDate:dates[0],lastDate:dates[dates.length-1],fields,byDay};
+} else {
+  // Format B: only sub.fields[]
+  subs.forEach(sub=>{
+    (sub.fields||[]).forEach(f=>{
+      if(!f.key)return;
+      if(!fields[f.key])fields[f.key]={label:f.label||f.key,type:f.type||'INPUT_TEXT',values:[]};
+      if(f.value!==null&&f.value!==undefined&&f.value!==''){
+        if(Array.isArray(f.value)){f.value.forEach(a=>{if(a!==null&&a!==undefined&&a!=='')fields[f.key].values.push(a);});}
+        else{fields[f.key].values.push(f.value);}
+      }
+    });
+  });
+}
+const durations=subs.map(s=>{
+  if(s.submittedAt&&s.createdAt)return(new Date(s.submittedAt)-new Date(s.createdAt))/60000;
+  return null;
+}).filter(v=>v!==null&&v>0&&v<120);
+const avgTime=durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length):null;
+const veryFast=durations.filter(v=>v<1).length;
+const completed=subs.filter(s=>s.isCompleted!==false).length;
+const dates=subs.map(s=>new Date(s.submittedAt||s.createdAt)).filter(d=>!isNaN(d)).sort((a,b)=>a-b);
+const byDay={};
+dates.forEach(d=>{const k=d.toISOString().slice(0,10);byDay[k]=(byDay[k]||0)+1;});
+return{total:subs.length,completionRate:subs.length?Math.round(completed/subs.length*100):0,avgTime,veryFast,firstDate:dates[0],lastDate:dates[dates.length-1],fields,byDay};
 }
 function checkQuality(d){
   hideAlert();
@@ -563,11 +587,9 @@ function loadDemo(){
 }
 
 // Auto-connect com credenciais salvas
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('formId').value = 'dWvNQo';
-  document.getElementById('apiKey').value = 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
-  connectForm();
-});
+document.getElementById('formId').value = 'dWvNQo';
+document.getElementById('apiKey').value = 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7';
+connectForm();
 </script>
 </body>
 </html>

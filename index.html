@@ -97,7 +97,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-sans);
 .nps-seg-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
 .nps-seg-fill { height: 100%; border-radius: 3px; transition: width .5s; }
 .nps-seg-pct { min-width: 32px; text-align: right; color: var(--text2); }
-.open-list { display: flex; flex-direction: column; gap: 0; max-height: 180px; overflow-y: auto; }
+.open-list { display: flex; flex-direction: column; gap: 0; }
 .open-item { font-size: 13px; color: var(--text2); padding: 9px 0; border-bottom: 0.5px solid var(--border); line-height: 1.55; display: flex; gap: 8px; }
 .open-item:last-child { border-bottom: none; }
 .open-num { font-size: 10px; font-family: var(--font-mono); color: var(--text3); padding-top: 3px; min-width: 20px; }
@@ -195,7 +195,7 @@ fetchTallyData(fid, key);
 
 async function fetchTallyData(fid, key) {
 try {
-const res = await fetch('https://api.tally.so/forms/' + fid + '/submissions?limit=500', {
+const res = await fetch('https://api.tally.so/forms/' + fid + '/submissions?limit=5000', {
 headers: { Authorization: 'Bearer ' + key }
 });
 if (!res.ok) throw new Error('Erro ' + res.status + ' — verifique Form ID e API Key');
@@ -319,9 +319,9 @@ return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.l
 }
 
 function renderOpen(field, idx) {
-const items = field.values.filter(Boolean).slice(0, 25);
+const items = field.values.filter(Boolean);
 const listHtml = items.map((v, i) => '<div class="open-item"><span class="open-num">' + (i+1) + '</span><span>' + String(v).slice(0, 250) + '</span></div>').join('');
-return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">texto aberto · ' + items.length + ' respostas</span></div><div class="open-list">' + (listHtml || '<p style="font-size:13px;color:var(--text2)">Sem respostas ainda.</p>') + '</div></div>';
+return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">texto aberto · ' + field.values.filter(Boolean).length + ' respostas</span></div><div class="open-list">' + (listHtml || '<p style="font-size:13px;color:var(--text2)">Sem respostas ainda.</p>') + '</div></div>';
 }
 
 async function generateInsights() {

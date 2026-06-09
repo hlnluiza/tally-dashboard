@@ -1,330 +1,1017 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tally Research Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Dashboard — Signal Over Noise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface2: #f0efe9;
-    --border: rgba(0,0,0,0.1);
-    --border2: rgba(0,0,0,0.18);
-    --text: #1a1a18;
-    --text2: #5a5a55;
-    --text3: #9a9990;
-    --accent: #1a1a18;
-    --green: #3B6D11;
-    --green-bg: #EAF3DE;
-    --amber: #854F0B;
-    --amber-bg: #FAEEDA;
-    --blue: #185FA5;
-    --blue-bg: #E6F1FB;
-    --red: #A32D2D;
-    --red-bg: #FCEBEB;
-    --font-sans: 'Syne', sans-serif;
-    --font-mono: 'DM Mono', monospace;
-    --radius: 10px;
-    --radius-lg: 14px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #161614;
-      --surface: #1f1f1c;
-      --surface2: #2a2a26;
-      --border: rgba(255,255,255,0.08);
-      --border2: rgba(255,255,255,0.15);
-      --text: #f0efe8;
-      --text2: #9a9990;
-      --text3: #5a5a55;
-      --green-bg: #17340440; --amber-bg: #41240240; --blue-bg: #042C5340; --red-bg: #50131340;
-    }
-  }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.6; min-height: 100vh; }
-  .page { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 12px; }
-  .logo { font-size: 16px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
-  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text); }
-  .config-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
-  .config-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; letter-spacing: .04em; text-transform: uppercase; }
-  .config-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-  .config-field { flex: 1; min-width: 160px; }
-  .config-field label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; }
-  .config-field input { width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 13px; font-family: var(--font-mono); color: var(--text); outline: none; transition: border-color .15s; }
-  .config-field input:focus { border-color: var(--border2); }
-  .btn { border-radius: var(--radius); padding: 8px 16px; font-size: 13px; font-weight: 500; font-family: var(--font-sans); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .15s, background .15s; white-space: nowrap; }
-  .btn-dark { background: var(--text); color: var(--bg); border: none; }
-  .btn-dark:hover { opacity: .82; }
-  .btn-dark:disabled { opacity: .35; cursor: not-allowed; }
-  .btn-outline { background: transparent; color: var(--text); border: 0.5px solid var(--border2); }
-  .btn-outline:hover { background: var(--surface2); }
-  .status-bar { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--text2); }
-  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
-  .pulse.live { background: #639922; animation: pulse 2s infinite; }
-  .pulse.demo { background: #378ADD; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.25} }
-  .new-badge { font-size: 11px; background: var(--green-bg); color: var(--green); border-radius: 20px; padding: 2px 9px; display: none; animation: pop .3s ease; }
-  @keyframes pop { 0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1} }
-  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-  .metric-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-  .metric-val { font-size: 26px; font-weight: 600; font-family: var(--font-mono); color: var(--text); line-height: 1; }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .section-title { font-size: 13px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; }
-  .count-badge { font-size: 11px; background: var(--surface2); border-radius: 20px; padding: 2px 8px; color: var(--text3); font-weight: 400; text-transform: none; letter-spacing: 0; }
-  .questions-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
-  .q-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
-  .q-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 1rem; }
-  .q-title { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.4; }
-  .q-badge { font-size: 11px; color: var(--text3); background: var(--surface2); border-radius: 20px; padding: 3px 9px; white-space: nowrap; border: 0.5px solid var(--border); }
-  .bar-row { margin-bottom: 9px; }
-  .bar-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
-  .bar-track { height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width .5s cubic-bezier(.4,0,.2,1); }
-  .nps-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-  .nps-big { font-size: 40px; font-weight: 600; font-family: var(--font-mono); line-height: 1; }
-  .nps-meta { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .nps-segs { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 7px; }
-  .nps-seg { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-  .nps-seg-name { width: 68px; color: var(--text2); }
-  .nps-seg-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .nps-seg-fill { height: 100%; border-radius: 3px; transition: width .5s; }
-  .nps-seg-pct { min-width: 32px; text-align: right; color: var(--text2); }
-  .open-list { display: flex; flex-direction: column; gap: 0; max-height: 180px; overflow-y: auto; }
-  .open-item { font-size: 13px; color: var(--text2); padding: 9px 0; border-bottom: 0.5px solid var(--border); line-height: 1.55; display: flex; gap: 8px; }
-  .open-item:last-child { border-bottom: none; }
-  .open-num { font-size: 10px; font-family: var(--font-mono); color: var(--text3); padding-top: 3px; min-width: 20px; }
-  .insights-panel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
-  .insights-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; gap: 12px; flex-wrap: wrap; }
-  .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 12px; }
-  .insight-card { border-radius: var(--radius); padding: 1rem; }
-  .insight-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-  .insight-body { font-size: 13px; line-height: 1.5; }
-  .insight-quote { font-size: 12px; margin-top: 8px; border-left: 2px solid; padding-left: 8px; font-style: italic; opacity: .75; line-height: 1.5; }
-  .pain-opps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  .pain-opps-col h4 { font-size: 12px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
-  .poi-item { display: flex; gap: 8px; font-size: 13px; color: var(--text2); padding: 7px 0; border-bottom: 0.5px solid var(--border); line-height: 1.45; }
-  .poi-item:last-child { border-bottom: none; }
-  .poi-icon { font-size: 14px; margin-top: 1px; flex-shrink: 0; }
-  .share-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
-  .share-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-  .share-url { flex: 1; min-width: 200px; font-size: 12px; font-family: var(--font-mono); background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .copied { font-size: 12px; color: var(--green); display: none; align-items: center; gap: 4px; }
-  .loading { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text2); padding: 1.5rem 0; }
-  .spinner { width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--text2); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty { text-align: center; padding: 4rem 1rem; color: var(--text3); }
-  .empty i { font-size: 36px; margin-bottom: 12px; display: block; opacity: .3; }
-  .empty p { font-size: 14px; line-height: 1.6; max-width: 340px; margin: 0 auto; }
-  @media (max-width: 520px) {
-    .pain-opps { grid-template-columns: 1fr; }
-    .nps-wrap { flex-direction: column; align-items: flex-start; gap: 16px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0E0F14;--bg2:#13151D;--bg3:#1A1D26;--bg4:#20243A;
+  --border:#2A2D3E;--border2:#353850;
+  --text:#E8EAF0;--text2:#9BA3BF;--text3:#5C6480;
+  --accent:#6B7FD7;--accent2:#4ECDC4;--danger:#E05C5C;--warn:#F0A05A;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',sans-serif;
+  --radius:8px;--radius-lg:12px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+button{cursor:pointer;font-family:var(--sans);font-size:13px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);padding:6px 14px;border-radius:var(--radius);transition:background .15s,border-color .15s}
+button:hover{background:var(--bg4);border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:#5a6ec4}
+button:disabled{opacity:.4;cursor:not-allowed}
+input,select{font-family:var(--sans);font-size:13px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius);outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--bg3)}
+h1,h2,h3,h4{font-weight:500;line-height:1.3}
+
+/* Layout */
+#app{display:flex;flex-direction:column;min-height:100vh}
+#topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.05em}
+.logo span{color:var(--text3)}
+#status-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;transition:background .3s}
+#status-dot.connected{background:var(--accent2)}
+#status-dot.error{background:var(--danger)}
+#status-dot.loading{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#status-label{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+#last-update{font-family:var(--mono);font-size:11px;color:var(--text3)}
+#countdown{font-family:var(--mono);font-size:11px;color:var(--text3)}
+
+#config-panel{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.cfg-group{display:flex;flex-direction:column;gap:4px}
+.cfg-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:.04em;text-transform:uppercase}
+.cfg-group input{width:280px}
+.cfg-group input.short{width:180px}
+
+#main{flex:1;padding:24px;display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+#left{display:flex;flex-direction:column;gap:20px}
+#right{display:flex;flex-direction:column;gap:20px;position:sticky;top:76px}
+
+/* Metric cards */
+#metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.metric-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.metric-value{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--text)}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* Filters */
+#filters{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.filter-count{font-family:var(--mono);font-size:12px;color:var(--accent2);margin-left:auto;align-self:center}
+.filter-group{display:flex;flex-direction:column;gap:4px}
+.filter-label{font-size:11px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px}
+.card-title{font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.card-title span{color:var(--text2);font-weight:400}
+
+/* Question blocks */
+.question-block{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.question-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.question-text{font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.question-type-badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;margin-bottom:8px;border:1px solid var(--border);color:var(--text3)}
+
+/* Bar charts */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bar-label{font-size:12px;color:var(--text2);min-width:140px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.bar-track{flex:1;background:var(--bg3);border-radius:3px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width .6s ease}
+.bar-pct{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:40px;text-align:right}
+.bar-count{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:28px;text-align:right}
+
+/* NPS Gauge */
+.nps-display{display:flex;align-items:center;gap:24px;margin-bottom:12px}
+.nps-score{font-family:var(--mono);font-size:42px;font-weight:500;line-height:1}
+.nps-score.positive{color:var(--accent2)}
+.nps-score.neutral{color:var(--warn)}
+.nps-score.negative{color:var(--danger)}
+.nps-breakdown{display:flex;gap:16px}
+.nps-seg{display:flex;flex-direction:column;gap:2px}
+.nps-seg-label{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.nps-seg-val{font-family:var(--mono);font-size:16px;font-weight:500}
+.nps-seg.promoters .nps-seg-val{color:var(--accent2)}
+.nps-seg.passives .nps-seg-val{color:var(--warn)}
+.nps-seg.detractors .nps-seg-val{color:var(--danger)}
+.likert-bars{display:flex;gap:3px;height:28px;border-radius:var(--radius);overflow:hidden}
+.likert-seg{height:100%;transition:width .6s ease;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.8);overflow:hidden}
+
+/* Open text */
+.responses-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+.responses-list.expanded{max-height:none}
+.response-item{background:var(--bg3);border-left:2px solid var(--border2);border-radius:0 var(--radius) var(--radius) 0;padding:10px 12px;font-size:13px;color:var(--text2);line-height:1.5}
+.response-item .resp-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:4px}
+.show-all-btn{font-family:var(--mono);font-size:11px;color:var(--accent);background:none;border:none;padding:6px 0;cursor:pointer;text-align:left}
+.show-all-btn:hover{color:var(--text)}
+
+/* Word cloud */
+#wordcloud-container{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0;min-height:60px}
+.word-tag{font-family:var(--mono);padding:3px 9px;border-radius:4px;border:1px solid var(--border);color:var(--text2);transition:background .15s}
+.word-tag:hover{background:var(--bg3);border-color:var(--accent);color:var(--text)}
+
+/* AI Insights */
+#insights-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.insights-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.insights-header h3{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+#insights-body{padding:16px}
+.insight-card{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.insight-card:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.insight-type{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.insight-type.theme{color:var(--accent)}
+.insight-type.pain{color:var(--danger)}
+.insight-type.opportunity{color:var(--accent2)}
+.insight-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.insight-quote{border-left:2px solid var(--border2);padding:6px 10px;margin-top:8px;font-style:italic;font-size:12px;color:var(--text3);line-height:1.5;border-radius:0 4px 4px 0}
+.insights-placeholder{text-align:center;padding:24px 16px;color:var(--text3);font-size:13px}
+.insights-placeholder p{margin-bottom:12px}
+
+/* Activity feed */
+#activity-feed{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;overflow:hidden}
+.feed-header{padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+#feed-list{max-height:280px;overflow-y:auto}
+.feed-item{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:2px}
+.feed-item:last-child{border-bottom:none}
+.feed-item .feed-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.feed-item .feed-text{font-size:12px;color:var(--text2);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.feed-new{animation:feedin .4s ease}
+@keyframes feedin{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+
+/* Summary stats */
+#summary-stats{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none}
+.stat-key{font-size:12px;color:var(--text3)}
+.stat-val{font-family:var(--mono);font-size:12px;color:var(--text2)}
+
+/* Error/empty */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-state svg{display:block;margin:0 auto 12px;opacity:.3}
+.error-banner{background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);border-radius:var(--radius);padding:10px 14px;color:var(--danger);font-size:13px;margin-bottom:16px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Loading skeleton */
+.skel{background:var(--bg3);border-radius:4px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}
+
+/* Chart area */
+.chart-wrap{position:relative;width:100%}
+
+@media(max-width:1100px){
+  #main{grid-template-columns:1fr}
+  #right{position:static}
+  #metrics{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
-<div class="page">
-  <div class="topbar">
-    <div class="logo"><span class="logo-dot"></span> Research Dashboard</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-outline" onclick="loadDemo()"><i class="ti ti-flask" aria-hidden="true"></i> Ver demo</button>
+<div id="app">
+
+  <header id="topbar">
+    <div class="topbar-left">
+      <div class="logo">research<span>/</span>signal</div>
+      <span id="status-dot"></span>
+      <span id="status-label">aguardando conexão</span>
     </div>
+    <div class="topbar-right">
+      <span id="countdown"></span>
+      <span id="last-update"></span>
+      <button id="btn-refresh" onclick="fetchData()">↺ Atualizar</button>
+    </div>
+  </header>
+
+  <div id="config-panel">
+    <div class="cfg-group">
+      <label class="cfg-label">Form ID</label>
+      <input type="text" id="cfg-formid" class="short" placeholder="ex: dWvNQo" value="dWvNQo">
+    </div>
+    <div class="cfg-group">
+      <label class="cfg-label">API Key</label>
+      <input type="password" id="cfg-apikey" placeholder="tly-..." value="tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7" style="width:320px">
+    </div>
+    <button class="primary" onclick="connect()">Conectar</button>
+    <button onclick="disconnect()" id="btn-disconnect" style="display:none">Desconectar</button>
   </div>
-  <div class="config-panel">
-    <div class="config-label"><i class="ti ti-plug" aria-hidden="true"></i> Configuração Tally</div>
-    <div class="config-row">
-      <div class="config-field">
-        <label for="formId">Form ID</label>
-        <input type="text" id="formId" placeholder="ex: wMZkbP" />
+
+  <div id="main">
+    <div id="left">
+      <div id="error-area"></div>
+
+      <!-- Metric Overview -->
+      <div id="metrics">
+        <div class="metric-card">
+          <div class="metric-label">Respostas</div>
+          <div class="metric-value" id="m-total">—</div>
+          <div class="metric-sub" id="m-filtered"></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Conclusão</div>
+          <div class="metric-value" id="m-completion">—</div>
+          <div class="metric-sub">taxa de conclusão</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Tempo médio</div>
+          <div class="metric-value" id="m-time">—</div>
+          <div class="metric-sub">por resposta</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Período</div>
+          <div class="metric-value" id="m-period" style="font-size:14px;padding-top:4px">—</div>
+          <div class="metric-sub" id="m-period-sub"></div>
+        </div>
       </div>
-      <div class="config-field">
-        <label for="apiKey">API Key</label>
-        <input type="password" id="apiKey" placeholder="tally_..." />
+
+      <!-- Filters -->
+      <div id="filters">
+        <div class="filter-group">
+          <label class="filter-label">De</label>
+          <input type="date" id="f-from">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Até</label>
+          <input type="date" id="f-to">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Filtrar por pergunta</label>
+          <select id="f-question" style="width:200px"><option value="">Todas as perguntas</option></select>
+        </div>
+        <div class="filter-group" id="f-answer-group" style="display:none">
+          <label class="filter-label">Resposta</label>
+          <select id="f-answer" style="width:180px"><option value="">Todos</option></select>
+        </div>
+        <button onclick="applyFilters()">Aplicar</button>
+        <button onclick="clearFilters()">Limpar</button>
+        <span class="filter-count" id="filter-count"></span>
       </div>
-      <button class="btn btn-dark" id="btnConnect" onclick="connectForm()">
-        <i class="ti ti-plug" aria-hidden="true"></i> Conectar
-      </button>
+
+      <!-- Questions Analysis -->
+      <div class="card" id="questions-card">
+        <div class="card-title">Análise por pergunta</div>
+        <div id="questions-body">
+          <div class="empty-state">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2"/></svg>
+            <p>Conecte o formulário para visualizar a análise</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="status-bar">
-      <span class="pulse" id="pulseEl"></span>
-      <span id="statusText">Aguardando conexão…</span>
-      <span class="new-badge" id="newBadge"></span>
-    </div>
-  </div>
-  <div id="mainContent">
-    <div class="empty">
-      <i class="ti ti-chart-dots" aria-hidden="true"></i>
-      <p>Insira o Form ID e API Key do Tally para carregar os dados, ou clique em "Ver demo" para explorar com dados simulados.</p>
+
+    <div id="right">
+      <!-- Activity Feed -->
+      <div id="activity-feed">
+        <div class="feed-header">↓ respostas em tempo real</div>
+        <div id="feed-list">
+          <div style="padding:20px 16px;color:var(--text3);font-size:12px;text-align:center">Aguardando dados...</div>
+        </div>
+      </div>
+
+      <!-- Summary stats -->
+      <div id="summary-stats">
+        <div class="card-title" style="margin-bottom:10px">
+          <span style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">Visão geral</span>
+        </div>
+        <div id="summary-body">
+          <div class="stat-row"><span class="stat-key">Perguntas</span><span class="stat-val" id="s-questions">—</span></div>
+          <div class="stat-row"><span class="stat-key">Campos abertos</span><span class="stat-val" id="s-open">—</span></div>
+          <div class="stat-row"><span class="stat-key">Campos fechados</span><span class="stat-val" id="s-closed">—</span></div>
+          <div class="stat-row"><span class="stat-key">Primeira resposta</span><span class="stat-val" id="s-first">—</span></div>
+          <div class="stat-row"><span class="stat-key">Última resposta</span><span class="stat-val" id="s-last">—</span></div>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div id="insights-panel">
+        <div class="insights-header">
+          <h3>✦ insights com ia</h3>
+          <button class="primary" id="btn-insights" onclick="generateInsights()">Gerar insights</button>
+        </div>
+        <div id="insights-body">
+          <div class="insights-placeholder">
+            <p>Conecte o formulário e clique em<br><strong>Gerar insights</strong> para análise automática<br>das respostas abertas via Claude.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
 <script>
-let pollInterval = null;
-let lastCount = 0;
-let researchData = null;
-const BAR_COLORS = ['#378ADD','#1D9E75','#D85A30','#BA7517','#D4537E','#7F77DD','#639922','#E24B4A'];
-function setStatus(type, text) {
-  const p = document.getElementById('pulseEl');
-  document.getElementById('statusText').textContent = text;
-  p.className = 'pulse ' + (type === 'live' ? 'live' : type === 'demo' ? 'demo' : '');
+const CLAUDE_API = "https://api.anthropic.com/v1/messages";
+const TALLY_API = "https://api.tally.so/forms";
+
+let state = {
+  formId: 'dWvNQo',
+  apiKey: 'tly-uTrXlk7sp6iizS3uRyCdVVQDvo7BZxy7',
+  connected: false,
+  responses: [],
+  filteredResponses: [],
+  formData: null,
+  pollInterval: null,
+  countdown: 30,
+  countdownInterval: null,
+  filters: { from: null, to: null, question: '', answer: '' },
+  charts: {},
+  seenIds: new Set(),
+  insightsGenerated: false
+};
+
+function setStatus(s, label) {
+  const dot = document.getElementById('status-dot');
+  dot.className = '';
+  dot.classList.add(s);
+  document.getElementById('status-label').textContent = label;
 }
-function showNewBadge(n) {
-  const b = document.getElementById('newBadge');
-  b.textContent = '+' + n + ' nova' + (n > 1 ? 's' : '') + ' resposta' + (n > 1 ? 's' : '');
-  b.style.display = 'inline-block';
-  setTimeout(() => { b.style.display = 'none'; }, 5000);
+
+function showError(msg) {
+  document.getElementById('error-area').innerHTML = msg
+    ? `<div class="error-banner">${msg}</div>` : '';
 }
-function connectForm() {
-  const fid = document.getElementById('formId').value.trim();
-  const key = document.getElementById('apiKey').value.trim();
-  if (!fid || !key) { alert('Preencha o Form ID e a API Key.'); return; }
-  setStatus('connecting', 'Conectando…');
-  fetchTallyData(fid, key);
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
-async function fetchTallyData(fid, key) {
+
+function fmtTime(ms) {
+  if (!ms || ms <= 0) return '—';
+  const s = Math.round(ms / 1000);
+  if (s < 60) return s + 's';
+  const m = Math.floor(s / 60), rs = s % 60;
+  return m + 'min' + (rs ? ' ' + rs + 's' : '');
+}
+
+function fmtShortDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function fmtHour(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function fetchData() {
+  if (!state.formId || !state.apiKey) return;
+  setStatus('loading', 'atualizando...');
   try {
-    const res = await fetch('https://api.tally.so/forms/' + fid + '/submissions?limit=500', {
-      headers: { Authorization: 'Bearer ' + key }
+    const url = `${TALLY_API}/${state.formId}/submissions?limit=500&page=1`;
+    const res = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${state.apiKey}`,
+        'Content-Type': 'application/json'
+      }
     });
-    if (!res.ok) throw new Error('Erro ' + res.status + ' — verifique Form ID e API Key');
-    const json = await res.json();
-    const parsed = parseTally(json);
-    researchData = parsed;
-    const isNew = parsed.total > lastCount && lastCount > 0;
-    if (isNew) showNewBadge(parsed.total - lastCount);
-    lastCount = parsed.total;
-    renderDashboard(parsed);
-    setStatus('live', 'Ao vivo · atualizado ' + new Date().toLocaleTimeString('pt-BR'));
-    if (!pollInterval) {
-      const currentFid = fid, currentKey = key;
-      pollInterval = setInterval(() => fetchTallyData(currentFid, currentKey), 30000);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Tally API ${res.status}: ${err.substring(0,120)}`);
     }
-  } catch(e) {
-    setStatus('off', 'Erro: ' + e.message);
-    document.getElementById('mainContent').innerHTML = '<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><p>' + e.message + '</p></div>';
+    const data = await res.json();
+    processData(data);
+    setStatus('connected', 'conectado');
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      'atualizado ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    showError('');
+    resetCountdown();
+  } catch (e) {
+    setStatus('error', 'erro na conexão');
+    showError('Erro ao buscar dados: ' + e.message + '. Verifique o Form ID e a API Key.');
+    console.error(e);
   }
 }
-function parseTally(json) {
-  const subs = json.submissions || [];
-  const fields = {};
-  subs.forEach(sub => {
-    (sub.fields || []).forEach(f => {
-      if (!fields[f.key]) fields[f.key] = { label: f.label, type: f.type, values: [] };
-      if (f.value !== null && f.value !== undefined && f.value !== '') fields[f.key].values.push(f.value);
+
+function processData(data) {
+  const submissions = data.responses || data.submissions || data.items || [];
+  const fields = data.fields || (data.questions) || extractFields(submissions);
+
+  state.responses = submissions.map(s => ({
+    id: s.id || s.responseId,
+    createdAt: s.createdAt || s.submittedAt,
+    finishedAt: s.updatedAt || s.finishedAt,
+    isCompleted: s.isCompleted !== undefined ? s.isCompleted : true,
+    submissionTime: s.submissionTime || s.duration || null,
+    answers: normalizeAnswers(s, fields)
+  }));
+
+  state.formData = { fields: fields };
+  populateFilterQuestions(fields);
+  applyFilters();
+  detectNewResponses();
+}
+
+function extractFields(submissions) {
+  if (!submissions.length) return [];
+  const fieldMap = {};
+  submissions.forEach(s => {
+    const answers = s.answers || s.fields || s.data || {};
+    if (Array.isArray(answers)) {
+      answers.forEach(a => {
+        if (a.fieldId || a.id) {
+          const id = a.fieldId || a.id;
+          if (!fieldMap[id]) fieldMap[id] = { id, label: a.label || a.question || id, type: guessType(a) };
+        }
+      });
+    } else {
+      Object.keys(answers).forEach(k => {
+        if (!fieldMap[k]) fieldMap[k] = { id: k, label: k, type: 'TEXT' };
+      });
+    }
+  });
+  return Object.values(fieldMap);
+}
+
+function guessType(a) {
+  if (a.type) return a.type.toUpperCase();
+  const v = a.value;
+  if (typeof v === 'string' && v.length > 60) return 'TEXTAREA';
+  if (typeof v === 'number') return 'RATING';
+  if (Array.isArray(v)) return 'CHECKBOX';
+  return 'TEXT';
+}
+
+function normalizeAnswers(s, fields) {
+  const out = {};
+  const raw = s.answers || s.fields || s.data || {};
+  if (Array.isArray(raw)) {
+    raw.forEach(a => {
+      const id = a.fieldId || a.id || a.key;
+      out[id] = a.value !== undefined ? a.value : a.answer;
+    });
+  } else {
+    Object.assign(out, raw);
+  }
+  return out;
+}
+
+function populateFilterQuestions(fields) {
+  const sel = document.getElementById('f-question');
+  sel.innerHTML = '<option value="">Todas as perguntas</option>';
+  const closed = fields.filter(f => !isOpenType(f.type));
+  closed.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.id;
+    opt.textContent = truncate(f.label || f.id, 50);
+    sel.appendChild(opt);
+  });
+}
+
+function isOpenType(t) {
+  if (!t) return true;
+  const u = t.toUpperCase();
+  return u === 'TEXTAREA' || u === 'TEXT' || u === 'INPUT_TEXT' || u === 'LONG_TEXT' || u === 'SHORT_TEXT';
+}
+
+document.getElementById('f-question').addEventListener('change', function() {
+  const qid = this.value;
+  const ag = document.getElementById('f-answer-group');
+  if (!qid) { ag.style.display = 'none'; return; }
+  ag.style.display = '';
+  const sel = document.getElementById('f-answer');
+  sel.innerHTML = '<option value="">Todos</option>';
+  const vals = new Set();
+  state.responses.forEach(r => {
+    const v = r.answers[qid];
+    if (v !== undefined && v !== null && v !== '') {
+      const arr = Array.isArray(v) ? v : [v];
+      arr.forEach(x => vals.add(String(x)));
+    }
+  });
+  Array.from(vals).sort().forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v; opt.textContent = truncate(v, 40);
+    sel.appendChild(opt);
+  });
+});
+
+function applyFilters() {
+  const from = document.getElementById('f-from').value;
+  const to = document.getElementById('f-to').value;
+  const qid = document.getElementById('f-question').value;
+  const ans = document.getElementById('f-answer').value;
+  state.filters = { from, to, question: qid, answer: ans };
+
+  let result = [...state.responses];
+  if (from) result = result.filter(r => r.createdAt >= from);
+  if (to) result = result.filter(r => r.createdAt <= to + 'T23:59:59');
+  if (qid && ans) {
+    result = result.filter(r => {
+      const v = r.answers[qid];
+      if (v === undefined || v === null) return false;
+      const arr = Array.isArray(v) ? v : [String(v)];
+      return arr.includes(ans);
+    });
+  }
+  state.filteredResponses = result;
+
+  const total = state.responses.length;
+  const filtered = result.length;
+  const isFiltered = filtered < total;
+  document.getElementById('filter-count').textContent =
+    isFiltered ? `${filtered} de ${total} respostas` : `${total} respostas`;
+
+  renderDashboard();
+}
+
+function clearFilters() {
+  document.getElementById('f-from').value = '';
+  document.getElementById('f-to').value = '';
+  document.getElementById('f-question').value = '';
+  document.getElementById('f-answer-group').style.display = 'none';
+  document.getElementById('f-answer').value = '';
+  applyFilters();
+}
+
+function renderDashboard() {
+  const rs = state.filteredResponses;
+  const total = rs.length;
+
+  document.getElementById('m-total').textContent = total;
+  const completed = rs.filter(r => r.isCompleted).length;
+  document.getElementById('m-completion').textContent =
+    total ? Math.round((completed / total) * 100) + '%' : '—';
+
+  const times = rs.map(r => r.submissionTime).filter(t => t && t > 0);
+  const avgTime = times.length ? times.reduce((a, b) => a + b, 0) / times.length : null;
+  document.getElementById('m-time').textContent = avgTime ? fmtTime(avgTime) : '—';
+
+  const dates = rs.map(r => r.createdAt).filter(Boolean).sort();
+  if (dates.length) {
+    document.getElementById('m-period').textContent =
+      fmtShortDate(dates[0]) + ' — ' + fmtShortDate(dates[dates.length - 1]);
+    document.getElementById('m-period-sub').textContent =
+      dates.length > 1 ? `${dates.length} dias de coleta` : 'primeiro dia';
+  }
+
+  if (state.formData && state.formData.fields) {
+    const fields = state.formData.fields;
+    const open = fields.filter(f => isOpenType(f.type)).length;
+    const closed = fields.length - open;
+    document.getElementById('s-questions').textContent = fields.length;
+    document.getElementById('s-open').textContent = open;
+    document.getElementById('s-closed').textContent = closed;
+  }
+  document.getElementById('s-first').textContent = dates.length ? fmtDate(dates[0]) : '—';
+  document.getElementById('s-last').textContent = dates.length ? fmtDate(dates[dates.length - 1]) : '—';
+  document.getElementById('m-filtered').textContent =
+    state.filteredResponses.length < state.responses.length
+      ? `(${state.filteredResponses.length} filtradas)` : '';
+
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questions-body');
+  const fields = state.formData && state.formData.fields ? state.formData.fields : [];
+  const rs = state.filteredResponses;
+
+  if (!fields.length) {
+    container.innerHTML = '<div class="empty-state"><p>Nenhuma pergunta encontrada nos dados.</p></div>';
+    return;
+  }
+
+  let html = '';
+  const openTexts = {};
+  const openFields = [];
+
+  fields.forEach((field, i) => {
+    const fid = field.id;
+    const label = field.label || field.title || fid;
+    const type = (field.type || 'TEXT').toUpperCase();
+
+    if (isOpenType(type)) {
+      const texts = rs.map(r => r.answers[fid]).filter(v => v && String(v).trim().length > 0).map(String);
+      openTexts[fid] = texts;
+      openFields.push({ field, texts });
+    } else {
+      const valueCounts = {};
+      rs.forEach(r => {
+        const v = r.answers[fid];
+        if (v === undefined || v === null || v === '') return;
+        const arr = Array.isArray(v) ? v : [v];
+        arr.forEach(x => {
+          const k = String(x);
+          valueCounts[k] = (valueCounts[k] || 0) + 1;
+        });
+      });
+      const total = rs.filter(r => r.answers[fid] !== undefined && r.answers[fid] !== null && r.answers[fid] !== '').length;
+      const isRating = type === 'RATING' || type === 'NPS' || type === 'LINEAR_SCALE' || type === 'OPINION_SCALE';
+      html += renderClosedQuestion(field, valueCounts, total, isRating, i);
+    }
+  });
+
+  if (openFields.length) {
+    html += renderOpenQuestions(openFields);
+  }
+
+  container.innerHTML = html || '<div class="empty-state"><p>Sem dados para exibir.</p></div>';
+  initCharts();
+}
+
+function renderClosedQuestion(field, valueCounts, total, isRating, idx) {
+  const label = field.label || field.title || field.id;
+  const type = (field.type || '').toUpperCase();
+  const typeBadge = typeLabel(type);
+
+  if (isRating) {
+    const vals = Object.entries(valueCounts)
+      .map(([k, v]) => ({ score: parseFloat(k), count: v }))
+      .filter(x => !isNaN(x.score));
+    return renderRatingQuestion(field, vals, total, typeBadge, idx);
+  }
+
+  const sorted = Object.entries(valueCounts).sort((a, b) => b[1] - a[1]);
+  const max = sorted.length ? sorted[0][1] : 1;
+
+  let rows = sorted.map(([label, count]) => {
+    const pct = total ? Math.round((count / total) * 100) : 0;
+    const barW = max ? Math.round((count / max) * 100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label" title="${label}">${truncate(label, 28)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${barW}%"></div></div>
+      <div class="bar-pct">${pct}%</div>
+      <div class="bar-count">${count}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="question-block">
+    <div class="question-type-badge">${typeBadge}</div>
+    <div class="question-text">${label}</div>
+    ${rows || '<p style="color:var(--text3);font-size:12px">Sem respostas</p>'}
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px">${total} respondentes</div>
+  </div>`;
+}
+
+function renderRatingQuestion(field, vals, total, typeBadge, idx) {
+  const label = field.label || field.id;
+  if (!vals.length) return `<div class="question-block">
+    <div class="question-type-badge">${typeBadge}</div>
+    <div class="question-text">${label}</div>
+    <p style="color:var(--text3);font-size:12px">Sem respostas</p></div>`;
+
+  const maxScore = Math.max(...vals.map(v => v.score));
+  const isNPS = maxScore >= 9 || typeBadge === 'NPS';
+
+  if (isNPS) {
+    const detractors = vals.filter(v => v.score <= 6).reduce((s, v) => s + v.count, 0);
+    const passives = vals.filter(v => v.score === 7 || v.score === 8).reduce((s, v) => s + v.count, 0);
+    const promoters = vals.filter(v => v.score >= 9).reduce((s, v) => s + v.count, 0);
+    const nps = total ? Math.round(((promoters - detractors) / total) * 100) : 0;
+    const scoreClass = nps >= 50 ? 'positive' : nps >= 0 ? 'neutral' : 'negative';
+
+    const pDet = total ? Math.round((detractors / total) * 100) : 0;
+    const pPas = total ? Math.round((passives / total) * 100) : 0;
+    const pPro = total ? Math.round((promoters / total) * 100) : 0;
+
+    return `<div class="question-block">
+      <div class="question-type-badge">NPS</div>
+      <div class="question-text">${label}</div>
+      <div class="nps-display">
+        <div class="nps-score ${scoreClass}">${nps > 0 ? '+' : ''}${nps}</div>
+        <div class="nps-breakdown">
+          <div class="nps-seg promoters"><div class="nps-seg-label">Promotores</div><div class="nps-seg-val">${pPro}%</div></div>
+          <div class="nps-seg passives"><div class="nps-seg-label">Neutros</div><div class="nps-seg-val">${pPas}%</div></div>
+          <div class="nps-seg detractors"><div class="nps-seg-label">Detratores</div><div class="nps-seg-val">${pDet}%</div></div>
+        </div>
+      </div>
+      <div class="likert-bars">
+        <div class="likert-seg" style="width:${pDet}%;background:var(--danger)">${pDet > 8 ? pDet+'%' : ''}</div>
+        <div class="likert-seg" style="width:${pPas}%;background:var(--warn)">${pPas > 8 ? pPas+'%' : ''}</div>
+        <div class="likert-seg" style="width:${pPro}%;background:var(--accent2)">${pPro > 8 ? pPro+'%' : ''}</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px">${total} respondentes</div>
+    </div>`;
+  }
+
+  const sorted = vals.sort((a, b) => a.score - b.score);
+  const maxCount = Math.max(...vals.map(v => v.count));
+  const colors = ['#E05C5C','#F0A05A','#F0C040','#4ECDC4','#6B7FD7'];
+
+  let rows = sorted.map(v => {
+    const pct = total ? Math.round((v.count / total) * 100) : 0;
+    const barW = maxCount ? Math.round((v.count / maxCount) * 100) : 0;
+    const c = colors[Math.floor((v.score / maxScore) * (colors.length - 1))];
+    return `<div class="bar-row">
+      <div class="bar-label">${v.score}${maxScore <= 5 ? ' ★' : ''}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${barW}%;background:${c}"></div></div>
+      <div class="bar-pct">${pct}%</div>
+      <div class="bar-count">${v.count}</div>
+    </div>`;
+  }).join('');
+
+  const avg = total ? (vals.reduce((s, v) => s + v.score * v.count, 0) / total).toFixed(1) : '—';
+  return `<div class="question-block">
+    <div class="question-type-badge">${typeBadge}</div>
+    <div class="question-text">${label}</div>
+    ${rows}
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px">Média: ${avg} · ${total} respondentes</div>
+  </div>`;
+}
+
+function renderOpenQuestions(openFields) {
+  let html = '';
+  openFields.forEach(({ field, texts }) => {
+    const label = field.label || field.id;
+    const wordFreq = buildWordFreq(texts);
+    const topWords = Object.entries(wordFreq).sort((a,b)=>b[1]-a[1]).slice(0, 30);
+
+    const wordTags = topWords.map(([w, c]) => {
+      const size = Math.max(11, Math.min(18, 11 + Math.floor(c * 2)));
+      return `<span class="word-tag" style="font-size:${size}px">${w} <span style="color:var(--text3);font-size:10px">${c}</span></span>`;
+    }).join('');
+
+    const recentTexts = texts.slice(-6).reverse().map((t, i) => {
+      return `<div class="response-item"><div class="resp-meta">resposta ${texts.length - i}</div>${escHtml(t)}</div>`;
+    }).join('');
+
+    const hasMore = texts.length > 6;
+    html += `<div class="question-block">
+      <div class="question-type-badge">ABERTA</div>
+      <div class="question-text">${label}</div>
+      <div style="margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Palavras mais frequentes</div>
+        <div id="wordcloud-container">${wordTags || '<span style="color:var(--text3);font-size:12px">Sem palavras suficientes</span>'}</div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Respostas recentes (${texts.length} total)</div>
+        <div class="responses-list" id="resp-list-${field.id}">${recentTexts}</div>
+        ${hasMore ? `<button class="show-all-btn" onclick="toggleAllResponses('${field.id}', ${texts.length})">↓ Ver todas as ${texts.length} respostas</button>` : ''}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+let expandedFields = {};
+function toggleAllResponses(fid, total) {
+  if (expandedFields[fid]) return;
+  expandedFields[fid] = true;
+  const container = document.getElementById('resp-list-' + fid);
+  if (!container) return;
+  const field = state.formData.fields.find(f => f.id === fid);
+  if (!field) return;
+  const texts = state.filteredResponses.map(r => r.answers[fid]).filter(v => v && String(v).trim()).map(String);
+  const allHtml = texts.map((t, i) => {
+    return `<div class="response-item"><div class="resp-meta">resposta ${i + 1}</div>${escHtml(t)}</div>`;
+  }).join('');
+  container.innerHTML = allHtml;
+  container.classList.add('expanded');
+  container.nextElementSibling && (container.nextElementSibling.textContent = '↑ Mostrar menos');
+}
+
+function buildWordFreq(texts) {
+  const stopwords = new Set(['de','a','o','que','e','do','da','em','um','para','é','com','uma','os','no','se','na','por','mais','as','dos','como','mas','foi','ao','ele','das','tem','à','seu','sua','ou','ser','quando','muito','há','nos','já','está','também','só','pelo','pela','até','isso','ela','entre','era','depois','sem','mesmo','aos','ter','seus','quem','nas','me','esse','eles','estão','você','tinha','foram','essa','num','nem','suas','meu','às','minha','numa','pelos','elas','havia','seja','qual','será','nós','tenho','lhe','deles','essas','esses','pelas','este','dele','tu','te','vocês','vos','lhes','meus','minhas','teu','tua','teus','tuas','nosso','nossa','nossos','nossas','dela','delas','esta','estes','estas','aquele','aquela','aqueles','aquelas','isto','aquilo','estou','está','estamos','estão','estive','esteve','estivemos','estiveram','estava','estávamos','estavam','estivera','estivéramos','esteja','estejamos','estejam','estivesse','estivéssemos','estivessem','estiver','estivermos','estiverem','the','and','is','to','in','of','that','it','for','on','are','with','as','this','was','at','by','be','have','from','or','an','but','not','they','we','you','all','can','had','he','she','her','his','him','our','out','up','do','if','their','what','so','said','about','which','been','were','when','there','its','my','your','will','one','would','no','more','has','than','other','into','then','these','those','some','who','may','i']);
+  const freq = {};
+  texts.forEach(t => {
+    t.toLowerCase().replace(/[^a-záéíóúàâêôãõüçñ\s]/g, ' ').split(/\s+/).forEach(w => {
+      if (w.length > 3 && !stopwords.has(w)) freq[w] = (freq[w] || 0) + 1;
     });
   });
-  const durations = subs.map(s => {
-    if (s.submittedAt && s.createdAt) return (new Date(s.submittedAt) - new Date(s.createdAt)) / 60000;
-    return null;
-  }).filter(v => v !== null && v > 0 && v < 120);
-  const avgTime = durations.length ? Math.round(durations.reduce((a,b)=>a+b,0)/durations.length) : null;
-  const completed = subs.filter(s => s.isCompleted !== false).length;
-  const dates = subs.map(s => new Date(s.submittedAt || s.createdAt)).filter(d => !isNaN(d)).sort((a,b)=>a-b);
-  return { total: subs.length, completionRate: subs.length ? Math.round(completed/subs.length*100) : 0, avgTime, firstDate: dates[0], lastDate: dates[dates.length-1], fields };
+  return freq;
 }
-function fmt(d) { return d ? d.toLocaleDateString('pt-BR') : '—'; }
-function renderDashboard(data) {
-  const mc = document.getElementById('mainContent');
-  const fieldKeys = Object.keys(data.fields);
-  let html = '<div class="metrics-row">';
-  html += '<div class="metric"><div class="metric-label">Respostas</div><div class="metric-val">' + data.total + '</div></div>';
-  html += '<div class="metric"><div class="metric-label">Conclusão</div><div class="metric-val">' + data.completionRate + '%</div></div>';
-  html += '<div class="metric"><div class="metric-label">Tempo médio</div><div class="metric-val">' + (data.avgTime != null ? data.avgTime + 'min' : '—') + '</div></div>';
-  html += '<div class="metric"><div class="metric-label">Período</div><div class="metric-val" style="font-size:14px;padding-top:6px;">' + fmt(data.firstDate) + '<span style="color:var(--text3)"> → </span>' + fmt(data.lastDate) + '</div></div>';
-  html += '</div>';
-  html += '<div class="section-header"><div class="section-title"><i class="ti ti-layout-list" aria-hidden="true"></i> Perguntas <span class="count-badge">' + fieldKeys.length + '</span></div></div>';
-  html += '<div class="questions-list">';
-  fieldKeys.forEach((key, idx) => { html += renderField(data.fields[key], idx); });
-  html += '</div>';
-  html += '<div class="insights-panel" id="insightsPanel">';
-  html += '<div class="insights-top"><div class="section-title" style="margin:0"><i class="ti ti-sparkles" aria-hidden="true"></i> Insights com IA</div>';
-  html += '<button class="btn btn-dark" onclick="generateInsights()"><i class="ti ti-wand" aria-hidden="true"></i> Gerar insights</button></div>';
-  html += '<div id="insightsContent"><p style="font-size:13px;color:var(--text2);">Clique em "Gerar insights" para analisar as respostas abertas e identificar temas, pontos de dor e oportunidades.</p></div></div>';
-  html += '<div class="share-card"><div class="section-title"><i class="ti ti-share" aria-hidden="true"></i> Compartilhar</div>';
-  const shareUrl = window.location.origin + window.location.pathname + (document.getElementById('formId').value ? '?formId=' + document.getElementById('formId').value : '');
-  html += '<div class="share-row"><div class="share-url" id="shareUrlEl">' + shareUrl + '</div>';
-  html += '<button class="btn btn-outline" onclick="copyShare()"><i class="ti ti-copy" aria-hidden="true"></i> Copiar</button>';
-  html += '<span class="copied" id="copiedMsg"><i class="ti ti-check" aria-hidden="true"></i> Copiado!</span></div></div>';
-  mc.innerHTML = html;
+
+function initCharts() {}
+
+function detectNewResponses() {
+  const feed = document.getElementById('feed-list');
+  const newOnes = state.responses
+    .filter(r => !state.seenIds.has(r.id))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 20);
+
+  if (!newOnes.length && state.seenIds.size > 0) return;
+
+  newOnes.forEach(r => state.seenIds.add(r.id));
+
+  const items = state.responses
+    .slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 20);
+
+  if (!items.length) {
+    feed.innerHTML = '<div style="padding:20px 16px;color:var(--text3);font-size:12px;text-align:center">Nenhuma resposta ainda</div>';
+    return;
+  }
+
+  feed.innerHTML = items.map((r, i) => {
+    const firstAnswer = Object.values(r.answers || {}).find(v => v && String(v).trim().length > 2);
+    const preview = firstAnswer ? escHtml(truncate(String(firstAnswer), 60)) : 'Resposta registrada';
+    return `<div class="feed-item ${i < newOnes.length ? 'feed-new' : ''}">
+      <div class="feed-time">${fmtShortDate(r.createdAt)} ${fmtHour(r.createdAt)}</div>
+      <div class="feed-text">${preview}</div>
+    </div>`;
+  }).join('');
 }
-function detectType(t) {
-  const s = (t || '').toUpperCase();
-  if (s.includes('MULTIPLE') || s.includes('CHECKBOX') || s.includes('DROPDOWN') || s.includes('RADIO') || s.includes('SELECT')) return 'choice';
-  if (s.includes('LINEAR') || s.includes('RATING') || s.includes('SCALE') || s.includes('NPS')) return 'nps';
-  return 'open';
-}
-function renderField(field, idx) {
-  const type = detectType(field.type);
-  if (type === 'choice') return renderChoice(field, idx);
-  if (type === 'nps') return renderNPS(field, idx);
-  return renderOpen(field, idx);
-}
-function renderChoice(field, idx) {
-  const counts = {};
-  field.values.forEach(v => { const arr = Array.isArray(v) ? v : [v]; arr.forEach(a => { if (a) counts[String(a)] = (counts[String(a)] || 0) + 1; }); });
-  const total = Math.max(field.values.length, 1);
-  const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
-  let bars = sorted.map(([opt, cnt], i) => { const pct = Math.round(cnt/total*100); return '<div class="bar-row"><div class="bar-meta"><span>' + opt + '</span><span style="font-family:var(--font-mono)">' + pct + '% (' + cnt + ')</span></div><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%;background:' + BAR_COLORS[i % BAR_COLORS.length] + ';"></div></div></div>'; }).join('');
-  return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">múltipla escolha</span></div>' + bars + '</div>';
-}
-function renderNPS(field, idx) {
-  const nums = field.values.map(v => parseFloat(v)).filter(v => !isNaN(v));
-  const total = Math.max(nums.length, 1);
-  const promoters = nums.filter(v => v >= 9).length;
-  const passives = nums.filter(v => v >= 7 && v < 9).length;
-  const detractors = nums.filter(v => v < 7).length;
-  const score = Math.round((promoters - detractors) / total * 100);
-  const avg = nums.length ? (nums.reduce((a,b) => a+b, 0) / nums.length).toFixed(1) : '—';
-  const scoreColor = score >= 50 ? '#3B6D11' : score >= 0 ? '#BA7517' : '#A32D2D';
-  return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">escala</span></div><div class="nps-wrap"><div><div class="nps-big" style="color:' + scoreColor + '">' + score + '</div><div class="nps-meta">Score · média ' + avg + '</div></div><div class="nps-segs"><div class="nps-seg"><span class="nps-seg-name" style="color:#3B6D11">Promotores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(promoters/total*100) + '%;background:#639922;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(promoters/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#854F0B">Passivos</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(passives/total*100) + '%;background:#EF9F27;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(passives/total*100) + '%</span></div><div class="nps-seg"><span class="nps-seg-name" style="color:#A32D2D">Detratores</span><div class="nps-seg-track"><div class="nps-seg-fill" style="width:' + Math.round(detractors/total*100) + '%;background:#E24B4A;"></div></div><span class="nps-seg-pct" style="font-family:var(--font-mono)">' + Math.round(detractors/total*100) + '%</span></div></div></div></div>';
-}
-function renderOpen(field, idx) {
-  const items = field.values.filter(Boolean).slice(0, 25);
-  const listHtml = items.map((v, i) => '<div class="open-item"><span class="open-num">' + (i+1) + '</span><span>' + String(v).slice(0, 250) + '</span></div>').join('');
-  return '<div class="q-card"><div class="q-top"><div class="q-title">' + (field.label || 'Pergunta ' + (idx+1)) + '</div><span class="q-badge">texto aberto · ' + items.length + ' respostas</span></div><div class="open-list">' + (listHtml || '<p style="font-size:13px;color:var(--text2)">Sem respostas ainda.</p>') + '</div></div>';
-}
+
 async function generateInsights() {
-  if (!researchData) return;
-  const ic = document.getElementById('insightsContent');
-  ic.innerHTML = '<div class="loading"><span class="spinner"></span> Analisando respostas com IA…</div>';
-  const openTexts = Object.values(researchData.fields).filter(f => detectType(f.type) === 'open').map(f => 'Pergunta: "' + f.label + '"\nRespostas:\n' + f.values.filter(Boolean).slice(0,30).map((v,i) => (i+1) + '. ' + v).join('\n')).join('\n\n---\n\n');
-  if (!openTexts.trim()) { ic.innerHTML = '<p style="font-size:13px;color:var(--text2)">Nenhuma pergunta aberta encontrada para analisar.</p>'; return; }
+  const btn = document.getElementById('btn-insights');
+  const body = document.getElementById('insights-body');
+  const rs = state.filteredResponses;
+
+  if (!rs.length) {
+    body.innerHTML = '<div class="insights-placeholder"><p>Sem respostas para analisar.</p></div>';
+    return;
+  }
+
+  const fields = state.formData && state.formData.fields ? state.formData.fields : [];
+  const openFields = fields.filter(f => isOpenType(f.type));
+
+  if (!openFields.length) {
+    body.innerHTML = '<div class="insights-placeholder"><p>Nenhuma pergunta aberta encontrada para análise qualitativa.</p></div>';
+    return;
+  }
+
+  let allTexts = [];
+  openFields.forEach(f => {
+    const label = f.label || f.id;
+    const texts = rs.map(r => r.answers[f.id]).filter(v => v && String(v).trim()).map(String);
+    if (texts.length) {
+      allTexts.push(`== ${label} ==`);
+      texts.forEach((t, i) => allTexts.push(`[${i+1}] ${t}`));
+    }
+  });
+
+  if (!allTexts.length) {
+    body.innerHTML = '<div class="insights-placeholder"><p>Nenhum texto qualitativo encontrado nas respostas filtradas.</p></div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Analisando...';
+  body.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text3)">
+    <div style="font-family:var(--mono);font-size:12px;margin-bottom:8px">Claude está analisando ${rs.length} respostas...</div>
+    <div class="skel" style="height:60px;margin-bottom:8px;border-radius:8px"></div>
+    <div class="skel" style="height:60px;margin-bottom:8px;border-radius:8px"></div>
+    <div class="skel" style="height:60px;border-radius:8px"></div>
+  </div>`;
+
+  const prompt = `Você é um UX Researcher sênior especialista em análise qualitativa.
+
+Analise as respostas abertas de pesquisa abaixo e retorne APENAS um JSON válido (sem markdown, sem explicações extras):
+
+{
+  "themes": [
+    {"title": "título do tema", "description": "explicação em 1-2 frases", "quote": "citação direta representativa"},
+    {"title": "título do tema 2", "description": "...", "quote": "..."},
+    {"title": "título do tema 3", "description": "...", "quote": "..."}
+  ],
+  "pains": [
+    {"title": "ponto de dor", "description": "impacto no usuário em 1-2 frases", "quote": "citação direta"},
+    {"title": "ponto de dor 2", "description": "...", "quote": "..."}
+  ],
+  "opportunities": [
+    {"title": "oportunidade", "description": "como endereçar em 1-2 frases", "quote": "citação que evidencia a oportunidade"},
+    {"title": "oportunidade 2", "description": "...", "quote": "..."}
+  ]
+}
+
+Respostas para análise (${rs.length} participantes):
+${allTexts.slice(0, 200).join('\n')}`;
+
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Você é especialista em UX Research. Analise as respostas e retorne APENAS JSON válido (sem markdown, sem texto extra) nesta estrutura exata:\n{"themes":[{"title":"título curto","text":"1 frase","quote":"citação direta"},{"title":"...","text":"...","quote":"..."},{"title":"...","text":"...","quote":"..."}],"pain_points":[{"text":"1 frase"},{"text":"..."}],"opportunities":[{"text":"1 frase"},{"text":"..."}]}\n\nRespostas:\n' + openTexts }] }) });
-    const data = await res.json();
-    const raw = (data.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
-    renderInsights(JSON.parse(raw));
-  } catch(e) { ic.innerHTML = '<p style="font-size:13px;color:var(--red)">Erro ao gerar insights: ' + e.message + '</p>'; }
+    const response = await fetch(CLAUDE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const rawText = data.content && data.content[0] ? data.content[0].text : '';
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const insights = JSON.parse(clean);
+    renderInsights(insights);
+    state.insightsGenerated = true;
+  } catch (e) {
+    body.innerHTML = `<div class="error-banner">Erro ao gerar insights: ${e.message}<br><small>Verifique o console para detalhes.</small></div>
+    <div class="insights-placeholder"><p>Tente novamente ou verifique a conexão com a API.</p></div>`;
+    console.error('Insights error:', e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '↺ Atualizar insights';
 }
-function renderInsights(ins) {
-  const themeColors = [{ bg: '#E6F1FB', fg: '#0C447C', border: '#185FA580' },{ bg: '#E1F5EE', fg: '#085041', border: '#1D9E7580' },{ bg: '#FAEEDA', fg: '#633806', border: '#BA751780' }];
-  let html = '<div class="insights-grid">';
-  (ins.themes || []).forEach((t, i) => { const c = themeColors[i % themeColors.length]; html += '<div class="insight-card" style="background:' + c.bg + ';border:0.5px solid ' + c.border + '"><div class="insight-tag" style="color:' + c.fg + '">Tema ' + (i+1) + '</div><div class="insight-body" style="color:' + c.fg + '"><strong>' + (t.title||'') + '</strong> — ' + (t.text||'') + '</div>' + (t.quote ? '<div class="insight-quote" style="color:' + c.fg + ';border-color:' + c.fg + '">"' + t.quote + '"</div>' : '') + '</div>'; });
-  html += '</div><div class="pain-opps"><div class="pain-opps-col"><h4><i class="ti ti-alert-circle" style="color:var(--red)" aria-hidden="true"></i> Pontos de dor</h4>';
-  (ins.pain_points || []).forEach(p => { html += '<div class="poi-item"><i class="ti ti-minus poi-icon" style="color:var(--red)" aria-hidden="true"></i>' + p.text + '</div>'; });
-  html += '</div><div class="pain-opps-col"><h4><i class="ti ti-bulb" style="color:var(--green)" aria-hidden="true"></i> Oportunidades</h4>';
-  (ins.opportunities || []).forEach(o => { html += '<div class="poi-item"><i class="ti ti-plus poi-icon" style="color:var(--green)" aria-hidden="true"></i>' + o.text + '</div>'; });
-  html += '</div></div>';
-  document.getElementById('insightsContent').innerHTML = html;
+
+function renderInsights(insights) {
+  const body = document.getElementById('insights-body');
+  let html = '';
+
+  (insights.themes || []).forEach(t => {
+    html += `<div class="insight-card">
+      <div class="insight-type theme">✦ tema recorrente</div>
+      <div class="insight-title">${escHtml(t.title)}</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.5">${escHtml(t.description)}</div>
+      ${t.quote ? `<div class="insight-quote">"${escHtml(t.quote)}"</div>` : ''}
+    </div>`;
+  });
+
+  (insights.pains || []).forEach(p => {
+    html += `<div class="insight-card">
+      <div class="insight-type pain">✗ ponto de dor</div>
+      <div class="insight-title">${escHtml(p.title)}</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.5">${escHtml(p.description)}</div>
+      ${p.quote ? `<div class="insight-quote" style="border-left-color:var(--danger)">"${escHtml(p.quote)}"</div>` : ''}
+    </div>`;
+  });
+
+  (insights.opportunities || []).forEach(o => {
+    html += `<div class="insight-card">
+      <div class="insight-type opportunity">→ oportunidade</div>
+      <div class="insight-title">${escHtml(o.title)}</div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.5">${escHtml(o.description)}</div>
+      ${o.quote ? `<div class="insight-quote" style="border-left-color:var(--accent2)">"${escHtml(o.quote)}"</div>` : ''}
+    </div>`;
+  });
+
+  body.innerHTML = html || '<div class="insights-placeholder"><p>Não foi possível extrair insights estruturados.</p></div>';
 }
-function copyShare() {
-  const url = document.getElementById('shareUrlEl')?.textContent || window.location.href;
-  navigator.clipboard.writeText(url).then(() => { const el = document.getElementById('copiedMsg'); el.style.display = 'inline-flex'; setTimeout(() => { el.style.display = 'none'; }, 2000); });
+
+function typeLabel(t) {
+  const map = {
+    'MULTIPLE_CHOICE': 'Múltipla escolha', 'CHECKBOX': 'Checkbox',
+    'DROPDOWN': 'Dropdown', 'RATING': 'Avaliação', 'NPS': 'NPS',
+    'LINEAR_SCALE': 'Escala linear', 'OPINION_SCALE': 'Escala', 'RANKING': 'Ranking',
+    'TEXT': 'Texto curto', 'TEXTAREA': 'Texto longo', 'INPUT_TEXT': 'Texto',
+    'LONG_TEXT': 'Texto longo', 'SHORT_TEXT': 'Texto curto', 'EMAIL': 'Email',
+    'NUMBER': 'Número', 'DATE': 'Data', 'PHONE_NUMBER': 'Telefone',
+    'FILE_UPLOAD': 'Arquivo', 'PAYMENT': 'Pagamento', 'MATRIX': 'Matriz'
+  };
+  return map[t] || t;
 }
-function loadDemo() {
-  researchData = { total: 87, completionRate: 91, avgTime: 4, firstDate: new Date('2025-05-01'), lastDate: new Date(), fields: { q1: { label: 'Com que frequência você usa a plataforma?', type: 'MULTIPLE_CHOICE', values: ['Diariamente','Semanalmente','Diariamente','Diariamente','Mensalmente','Semanalmente','Diariamente','Raramente','Diariamente','Semanalmente','Diariamente','Mensalmente','Diariamente','Semanalmente','Diariamente','Diariamente','Raramente','Semanalmente','Diariamente','Mensalmente'] }, q2: { label: 'De 0 a 10, qual a probabilidade de recomendar?', type: 'LINEAR_SCALE', values: [9,8,10,7,9,6,10,8,9,9,10,7,8,9,10,9,8,6,9,10,7,8,9,10,9,8,7,9,10,9] }, q3: { label: 'Qual funcionalidade você mais usa?', type: 'MULTIPLE_CHOICE', values: ['Rastreamento de envios','Integrações','Rastreamento de envios','Cotação de fretes','Integrações','Rastreamento de envios','Cotação de fretes','Relatórios','Rastreamento de envios','Integrações','Rastreamento de envios','Cotação de fretes','Relatórios','Integrações','Rastreamento de envios'] }, q4: { label: 'O que você mudaria na plataforma?', type: 'TEXTAREA', values: ['A interface de rastreamento poderia ser mais visual e intuitiva','Gostaria de notificações em tempo real por WhatsApp','O processo de cotação tem muitos cliques, poderia ser mais direto','Integração com mais ERPs além dos que já existem','Relatórios com mais filtros e exportação facilitada','A busca de pedidos é lenta quando tenho muitos envios','Seria ótimo ter um app mobile com todas as funcionalidades','Às vezes o sistema fica lento no horário de pico','Quero conseguir ver o histórico de preços dos fretes mais facilmente','O onboarding poderia ter tutoriais interativos'] }, q5: { label: 'Qual seu maior desafio logístico hoje?', type: 'TEXTAREA', values: ['Gerenciar devoluções de forma eficiente','Comunicar status de entrega pro cliente final','Negociar tarifas melhores com as transportadoras','Conciliar dados de frete com o financeiro','Lidar com ocorrências e atrasos de forma proativa','Integrar o sistema com minha loja online','Controlar custos de frete no dia a dia','Rastrear múltiplos pedidos ao mesmo tempo sem perder nada'] } } };
-  lastCount = 87;
-  renderDashboard(researchData);
-  setStatus('demo', 'Modo demo · dados simulados');
+
+function truncate(s, n) {
+  return s && s.length > n ? s.substring(0, n) + '…' : s;
 }
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function connect() {
+  const fid = document.getElementById('cfg-formid').value.trim();
+  const key = document.getElementById('cfg-apikey').value.trim();
+  if (!fid || !key) { showError('Informe o Form ID e a API Key.'); return; }
+  state.formId = fid;
+  state.apiKey = key;
+  state.connected = true;
+  state.responses = [];
+  state.seenIds = new Set();
+  showError('');
+  document.getElementById('btn-disconnect').style.display = '';
+  fetchData();
+  startPolling();
+}
+
+function disconnect() {
+  state.connected = false;
+  clearInterval(state.pollInterval);
+  clearInterval(state.countdownInterval);
+  state.pollInterval = null;
+  state.countdownInterval = null;
+  setStatus('', 'desconectado');
+  document.getElementById('btn-disconnect').style.display = 'none';
+  document.getElementById('countdown').textContent = '';
+  document.getElementById('last-update').textContent = '';
+}
+
+function startPolling() {
+  if (state.pollInterval) clearInterval(state.pollInterval);
+  if (state.countdownInterval) clearInterval(state.countdownInterval);
+  state.countdown = 30;
+  state.pollInterval = setInterval(fetchData, 30000);
+  state.countdownInterval = setInterval(() => {
+    state.countdown--;
+    if (state.countdown < 0) state.countdown = 30;
+    document.getElementById('countdown').textContent =
+      state.connected ? `↺ ${state.countdown}s` : '';
+  }, 1000);
+}
+
+function resetCountdown() {
+  state.countdown = 30;
+}
+
+window.addEventListener('load', () => {
+  if (state.formId && state.apiKey) {
+    connect();
+  }
+});
 </script>
 </body>
 </html>
